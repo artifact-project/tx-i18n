@@ -1,10 +1,10 @@
 {
   "name": "tx-i18n",
   "version": "0.1.0",
-  "description": "Scaffold for Artifact project",
+  "description": "Auto-translate for your application (React supported)",
   "author": "",
   "license": "MIT",
-  "repository": "git@github.com:artifact-project/scaffold.git",
+  "repository": "git@github.com:artifact-project/tx-i18n.git",
   "main": "index.js",
   "scripts": {
     "test": "jest --coverage",
@@ -23,14 +23,18 @@
     "@types/jest": "^19.2.3",
     "@types/node": "^10.9.1",
     "@types/react": "^16.4.11",
-    "@types/webpack": "^4.4.11",
-    "awesome-typescript-loader": "^5.2.0",
+    "@types/webpack": "^3.8.14",
+    "awesome-typescript-loader": "^3.5.0",
     "jest": "^20.0.3",
+    "memory-fs": "^0.4.1",
     "react": "^16.4.2",
     "react-test-renderer": "^16.4.2",
     "ts-jest": "^20.0.4",
     "typescript": "^3.0.1",
-    "webpack": "^4.17.1"
+    "webpack": "^3.12.0"
+  },
+  "peerDependencies": {
+    "react": ">=15.0."
   },
   "jest": {
     "transform": {

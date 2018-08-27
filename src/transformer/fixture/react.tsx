@@ -1,11 +1,11 @@
 import * as React from 'react';
 
 export const Static = () => (
-	<div>Вова, купи "гречу"!</div>
+	<div className={'host'}>Вова, купи "гречу"!</div>
 );
 
 export const Hello = ({username}) => (
-	<div>Привет {username}-кун!1</div>
+	<div className={`host`}>Привет {username}-кун!1</div>
 );
 
 export const ClickHere = ({username}) => (

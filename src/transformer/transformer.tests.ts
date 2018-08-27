@@ -21,7 +21,10 @@ export function transform(name: string, options: Partial<ts.CompilerOptions> = {
 				...options,
 			},
 			transformers: {
-				before: [transformerFactory({fnName: '__'})],
+				before: [transformerFactory({
+					fnName: '__',
+					exclude: [],
+				})],
 			},
 		},
 	);

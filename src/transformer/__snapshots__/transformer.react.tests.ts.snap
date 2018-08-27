@@ -30,13 +30,17 @@ exports[`render react react: ClickHere 1`] = `
 `;
 
 exports[`render react react: Hello 1`] = `
-<div>
+<div
+  className="host"
+>
   Привет Рубаха-кун!1
 </div>
 `;
 
 exports[`render react react: Static 1`] = `
-<div>
+<div
+  className="host"
+>
   Вова, купи "гречу"!
 </div>
 `;
@@ -44,7 +48,9 @@ exports[`render react react: Static 1`] = `
 exports[`render react-composite react-composite: DeepHello (invert) 1`] = `
 <div>
   No or 
-  <div>
+  <div
+    className="host"
+  >
     i18n, HI!
   </div>
   !
@@ -53,7 +59,9 @@ exports[`render react-composite react-composite: DeepHello (invert) 1`] = `
 
 exports[`render react-composite react-composite: DeepHello 1`] = `
 <div>
-  <div>
+  <div
+    className="host"
+  >
     Hi, i18n-kun!
   </div>
    or No!
@@ -125,8 +133,8 @@ __(\\"<#0> шесть <#1> восемь\\", [5, 7]);
 exports[`transform react 1`] = `
 "import __ from \\"tx-i18n\\";
 import * as React from 'react';
-export const Static = () => (<div>{__(\\"Вова, купи \\\\\\"гречу\\\\\\"!\\")}</div>);
-export const Hello = ({ username }) => (<div>{__(\\"Привет <#1>-кун!1\\", [username])}</div>);
+export const Static = () => (<div className={'host'}>{__(\\"Вова, купи \\\\\\"гречу\\\\\\"!\\")}</div>);
+export const Hello = ({ username }) => (<div className={\`host\`}>{__(\\"Привет <#1>-кун!1\\", [username])}</div>);
 export const ClickHere = ({ username }) => (__.jsx(\\"Привет <#1>, нажми <2>здесь</2> чтобы продолжить.\\", [{ type: \\"div\\", props: null }, username, { type: \\"a\\", props: { href: \\"#\\" } }]));
 export const Input = ({ hint, mode }) => (<div className={\`input \${mode}\`}>
 		<input placeholder={__(\\"Подсказка: <#0>\\", [hint])}/>

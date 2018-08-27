@@ -4,10 +4,12 @@ interface Config {
 	isHumanText?: (text: string, node: ts.Node) => boolean;
 	isTranslatableJsxAttribute?: (attr: ts.JsxAttribute, element: ts.JsxOpeningLikeElement) => boolean;
 	fnName: string;
+	packageName: string
 	fileName: string;
 	imports: {
 		[name:string]: ts.ImportDeclaration;
 	};
+	exclude: string[];
 	compilerOptions: ts.CompilerOptions;
 	// importDecls: {
 	// 	[name:string]: ts.ImportDeclaration;
@@ -67,7 +69,7 @@ function useNativeImport(module: ts.ModuleKind) {
 }
 
 function i18nId(cfg: Config, prop?: string) {
-	const importDecl = addImport(cfg.imports, cfg.fnName, 'tx-i18n');
+	const importDecl = addImport(cfg.imports, cfg.fnName, cfg.packageName);
 	const id = useNativeImport(cfg.compilerOptions.module)
 		? ts.createIdentifier(cfg.fnName)
 		: ts.getGeneratedNameForNode(importDecl);
@@ -134,16 +136,22 @@ function visitNode(node: ts.Node, context, cfg: Config): ts.Node {
 		)
 		&& isHumanText(node.getFullText(), node)
 	) {
-		const translated = wrapStringLiteral(node, cfg);
-
-		if (node.parent && ts.isJsxAttribute(node.parent)) {
-			if (cfg.isTranslatableJsxAttribute(node.parent, node.parent.parent.parent)) {
-				return ts.createJsxExpression(undefined, translated);
+		const attr = node.parent
+			? (
+				ts.isJsxAttribute(node.parent)
+					? node.parent
+					: node.parent.parent && ts.isJsxAttribute(node.parent.parent) && node.parent.parent
+			)
+			: null
+		;
+		if (attr) {
+			if (cfg.isTranslatableJsxAttribute(attr, attr.parent.parent)) {
+				return ts.createJsxExpression(undefined, wrapStringLiteral(node, cfg));
 			}
 			return node;
 		}
 
-		return translated;
+		return wrapStringLiteral(node, cfg);
 	} else if (ts.isTemplateExpression(node)) {
 		if (
 			node.parent
@@ -299,20 +307,30 @@ function jsxTagToObject(node: ts.JsxElement | ts.JsxSelfClosingElement, context,
 	]);
 }
 
-export default function transformerFactory(config: Pick<Config, 'fnName'>) {
+function checkExcludeFile(this: Config, mask: string) {
+	return this.fileName.match(mask) !== null;
+}
+
+export default function transformerFactory(config: Partial<Pick<Config, 'fnName' | 'packageName' | 'exclude'>>) {
 	return function transformer(context: ts.TransformationContext) {
 		return function visitor(file: ts.SourceFile) {
 			const cfg: Config = {
 				fnName: '__',
+				packageName: 'tx-i18n',
 				fileName: file.fileName,
+				exclude: ['/tx-i18n/', '/node_modules/'],
 				imports: {},
 				compilerOptions: context.getCompilerOptions(),
 				isHumanText: (value: string) => /[\wа-яё]/.test(value.trim().replace(/\d+([^\s]+)?/g, '')),
 				isTranslatableJsxAttribute: (attr: ts.JsxAttribute) => /^(title|alt|placeholder|value)$/.test(attr.name.getText()),
 				...config,
 			};
-			const result = visitNodeAndChildren(file, context, cfg);
 
+			if (cfg.exclude.some(checkExcludeFile, cfg)) {
+				return file;
+			}
+
+			const result = visitNodeAndChildren(file, context, cfg);
 
 			return ts.updateSourceFileNode(
 				result,
