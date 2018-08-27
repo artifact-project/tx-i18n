@@ -2,7 +2,7 @@
   "name": "tx-i18n",
   "version": "0.1.0",
   "description": "Auto-translate for your application (React supported)",
-  "author": "",
+  "author": "RubaXa <ibn@rubaxa.org>",
   "license": "MIT",
   "repository": "git@github.com:artifact-project/tx-i18n.git",
   "main": "index.js",

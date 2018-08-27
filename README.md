@@ -11,6 +11,7 @@ npm i --save-dev tx-i18n
 ### Usage with webpack
 
 ```js
+// webpack.config.js
 const { i18nTx, i18nExtractor } = require('tx-i18n/webpack');
 
 module.exports = {
@@ -24,7 +25,7 @@ module.exports = {
 			options: {
 				getCustomTransformers: () => ({
 					before: [
-						i18nTx(), // <!--- TypeScript Transformer
+						i18nTx({}), // <!--- TypeScript i18n Transformer
 					],
 					after: [],
 				}),
@@ -34,10 +35,20 @@ module.exports = {
 
 	plugins: [
 		new i18nExtractor({
-			output: './locale/default.json',
+			output: './locale/default.json', // <!--- Extract original phrases
 		}),
 	],
 };
+
+// app-entry-point.ts
+import { createLocale, setLocale, setLang } from 'tx-i18n';
+import originalPhrases from './locale/default';
+import translatedPhrases from './locale/en';
+
+setLocale('default', createLocale(originalPhrases, originalPhrases));
+setLocale('en', createLocale(originalPhrases, translatedPhrases));
+
+setLang('en');
 ```
 
 ---
