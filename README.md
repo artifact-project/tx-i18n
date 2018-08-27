@@ -10,8 +10,9 @@ npm i --save-dev tx-i18n
 
 ### Usage with webpack
 
+##### `webpack.config.js`
+
 ```js
-// webpack.config.js
 const { i18nTx, i18nExtractor } = require('tx-i18n/webpack');
 
 module.exports = {
@@ -39,8 +40,11 @@ module.exports = {
 		}),
 	],
 };
+```
 
-// app-entry-point.ts
+##### `app-entry-point.ts`
+
+```ts
 import { createLocale, setLocale, setLang } from 'tx-i18n';
 import originalPhrases from './locale/default';
 import translatedPhrases from './locale/en';
