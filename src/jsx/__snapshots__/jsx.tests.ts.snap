@@ -1,0 +1,32 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`jsx 1`] = `
+Object {
+  "props": Object {
+    "children": Array [
+      "Привет ",
+      "Вася",
+      ", нажми ",
+      Object {
+        "props": Object {
+          "children": Array [
+            "здесь",
+          ],
+          "href": "#",
+        },
+        "type": "a",
+      },
+      " чтобы продолжить",
+      Object {
+        "props": Object {
+          "children": Array [],
+          "className": "icon",
+        },
+        "type": "i",
+      },
+      ".",
+    ],
+  },
+  "type": "div",
+}
+`;
