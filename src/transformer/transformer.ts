@@ -169,8 +169,12 @@ function visitNode(node: ts.Node, context, cfg: Config): ts.Node {
 			;
 
 			if (attr) {
-				if (cfg.isTranslatableJsxAttribute(attr, attr.parent.parent)) {
-					return ts.createJsxExpression(undefined, wrapStringLiteral(node, cfg));
+				if (
+					!isTagName(attr.parent.parent.tagName.getText())
+					|| cfg.isTranslatableJsxAttribute(attr, attr.parent.parent)
+				) {
+					const newNode = wrapStringLiteral(node, cfg);
+					return newNode === node ? node : ts.createJsxExpression(undefined, newNode);
 				}
 				return node;
 			}

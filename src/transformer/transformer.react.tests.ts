@@ -9,7 +9,7 @@ beforeEach(() => {
 	setDefaultLocale({});
 })
 
-xdescribe('transform', () => {
+describe('transform', () => {
 	it('react', () => {
 		expect(transform('react')).toMatchSnapshot();
 	});
@@ -19,7 +19,7 @@ xdescribe('transform', () => {
 	});
 });
 
-xdescribe('render', () => {
+describe('render', () => {
 	function load(name): any {
 		try {
 			const exports = {};
@@ -91,6 +91,9 @@ xdescribe('render', () => {
 
 		it('react-composite: Dialog', () => {
 			setDefaultLocale({
+				'Подвал': 'Footer',
+				'Хорошо': 'OK',
+				'Отмена': 'Cancel',
 				'Ширина:': 'Width:',
 				'Да<#1><2/>': '<2/> — yes',
 			});

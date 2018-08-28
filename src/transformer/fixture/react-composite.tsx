@@ -7,10 +7,30 @@ export const DeepHello = (props) => {
 	</div>
 };
 
+export const Button = ({name, text}) => {
+	return <button name={name} value={text}/>
+}
+
+export const Form = (props) => {
+	return (
+		<form>
+			{props.children}
+			<div>
+				{props.controls}
+			</div>
+		</form>
+	)
+}
+
 export const Dialog = (props) => (
 	<div className="host">
 		<h1>Alert</h1>
-		<form>
+		<Form controls={
+			<div title="Подвал">
+				<Button name="submit" text="Хорошо"/>
+				<button value="Отмена"/>
+			</div>
+		}>
 			<h2>Бла-бла-бла</h2>
 			<fieldset>
 				<div className="row">
@@ -24,6 +44,6 @@ export const Dialog = (props) => (
 					</div>
 				</div>
 			</fieldset>
-		</form>
+		</Form>
 	</div>
 );
