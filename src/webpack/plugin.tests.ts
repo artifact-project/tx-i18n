@@ -4,7 +4,7 @@ import webpackConfig from './fixture/webpack.config';
 import { Extractor } from './plugin';
 
 const fs = new MemoryFS();
-const localeOutput = `${__dirname}/phrases.js`;
+const localeOutput = `${__dirname}/phrases.json`;
 const compiler = webpack({
 	...webpackConfig,
 	plugins: [
@@ -29,7 +29,9 @@ it('Extract', async () => {
 			}
 
 			resolve(new Promise(resolve => {
-				expect(JSON.parse(compiler.outputFileSystem.readFileSync(localeOutput) + '')).toEqual({
+				const content = compiler.outputFileSystem.readFileSync(localeOutput) + '';
+
+				expect(JSON.parse(content)).toEqual({
 					'Демо': 'Демо',
 					'Мы рады видеть тебя!': 'Мы рады видеть тебя!',
 					'Привет, <1><#2></1>!': 'Привет, <1><#2></1>!',

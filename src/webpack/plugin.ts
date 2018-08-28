@@ -1,9 +1,12 @@
 import { writeFileSync } from 'fs';
 import { getPhrases, resetPhrases } from '../transformer/transformer';
 import { Compiler } from 'webpack';
+import { Locale } from '../i18n/locale';
 
 type ExtractorOptions = {
 	output: string;
+	indent?: string;
+	stringify?: (json: Locale) => string;
 	outputFileSystem?: {
 		writeFileSync(filename: string, content: string): void
 	};
@@ -27,19 +30,38 @@ export class Extractor {
 	}
 
 	private save() {
-		const content = JSON.stringify(
-			getPhrases().reduce((locale, phrase) => {
-				locale[phrase] = phrase;
-				return locale;
-			}, {}),
-			null,
-			2,
-		);
+		const {
+			output,
+			indent = '  ',
+			stringify,
+		} = this.options;;
+		const locale = getPhrases().reduce((locale, phrase) => {
+			locale[phrase] = phrase;
+			return locale;
+		}, {});
+		let content = '';
+
+		if (stringify) {
+			content = stringify(locale);
+		} else {
+			content = (
+				'{\n' +
+					Object
+						.keys(locale)
+						.map(key => `${indent}${JSON.stringify(key)}: ${JSON.stringify(locale[key])}`)
+						.join(',\n') +
+				'\n}'
+			);
+
+			if (/\.[tj]sx?$/.test(output)) {
+				content = `export default ${content};`;
+			}
+		}
 
 		if (this._content !== content) {
 			this._content = content;
 			this.options.outputFileSystem.writeFileSync(
-				this.options.output,
+				output,
 				content,
 			);
 		}
