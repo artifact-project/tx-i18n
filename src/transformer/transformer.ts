@@ -103,6 +103,10 @@ function hasJsxTextChildren(node: ts.JsxElement, cfg: Config) {
 function wrapStringLiteral(node: ts.StringLiteralLike, cfg: Config) {
 	const text = node.getText();
 
+	if (!cfg.isHumanText(text, node)) {
+		return visited(node);
+	}
+
 	savePhrase(text.slice(1, -1));
 
 	return ts.createCall(i18nId(cfg), [], [
@@ -118,6 +122,10 @@ function wrapTemplateExpression(node: ts.TemplateExpression, context, cfg: Confi
 		phrase += `<#${idx}>${span.literal.text}`;
 		args.push(visitNodeAndChildren(span.expression, context, cfg));
 	});
+
+	if (!cfg.isHumanText(phrase, node)) {
+		return visited(node);
+	}
 
 	savePhrase(phrase);
 
