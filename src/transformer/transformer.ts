@@ -9,6 +9,7 @@ interface Config {
 	imports: {
 		[name:string]: ts.ImportDeclaration;
 	};
+	include: string[];
 	exclude: string[];
 	compilerOptions: ts.CompilerOptions;
 	// importDecls: {
@@ -307,11 +308,18 @@ function jsxTagToObject(node: ts.JsxElement | ts.JsxSelfClosingElement, context,
 	]);
 }
 
-function checkExcludeFile(this: Config, mask: string) {
+function checkPatterFile(this: Config, mask: string) {
 	return this.fileName.match(mask) !== null;
 }
 
-export default function transformerFactory(config: Partial<Pick<Config, 'fnName' | 'packageName' | 'exclude'>>) {
+export type TXConfig = Partial<Pick<Config,
+	'fnName'
+	| 'packageName'
+	| 'include'
+	| 'exclude'
+>>
+
+export default function transformerFactory(config: TXConfig) {
 	return function transformer(context: ts.TransformationContext) {
 		return function visitor(file: ts.SourceFile) {
 			const cfg: Config = {
@@ -319,6 +327,7 @@ export default function transformerFactory(config: Partial<Pick<Config, 'fnName'
 				packageName: 'tx-i18n',
 				fileName: file.fileName,
 				exclude: ['/tx-i18n/', '/node_modules/'],
+				include: null,
 				imports: {},
 				compilerOptions: context.getCompilerOptions(),
 				isHumanText: (value: string) => /[\wа-яё]/.test(value.trim().replace(/\d+([^\s]+)?/g, '')),
@@ -326,7 +335,11 @@ export default function transformerFactory(config: Partial<Pick<Config, 'fnName'
 				...config,
 			};
 
-			if (cfg.exclude.some(checkExcludeFile, cfg)) {
+			if (cfg.exclude.some(checkPatterFile, cfg)) {
+				return file;
+			}
+
+			if (cfg.include && !cfg.include.some(checkPatterFile, cfg)) {
 				return file;
 			}
 
