@@ -91,6 +91,9 @@ exports[`render react-composite react-composite: Dialog 1`] = `
            — yes
         </div>
       </div>
+      <div>
+        Окей
+      </div>
     </fieldset>
     <div>
       <div
@@ -141,23 +144,34 @@ export const Form = (props) => {
 			</div>
 		</form>);
 };
-export const Dialog = (props) => (<div className=\\"host\\">
-		<h1>{__(\\"Alert\\")}</h1>
-		<Form controls={<div title={__(\\"Подвал\\")}>
-				<Button name={__(\\"submit\\")} text={__(\\"Хорошо\\")}/>
-				<button value={__(\\"Отмена\\")}/>
-			</div>}>
-			<h2>{__(\\"Бла-бла-бла\\")}</h2>
-			<fieldset>
-				<div className=\\"row\\">
-					<div className=\\"col\\">{__(\\"Ширина:\\")}</div>
-					<div className=\\"col\\">123px</div>
-				</div>
-				<div className=\\"row\\">
-					{__.jsx(\\"Да<#1><2/>\\", [{ type: \\"div\\", props: { className: \\"col\\" } }, ' ', { type: \\"input\\", props: { type: \\"checked\\" } }])}
-				</div>
-			</fieldset>
-		</Form>
-	</div>);
+export class Dialog extends React.Component {
+    innerRender(props) {
+    }
+    render() {
+        const { props } = this;
+        return (<div className=\\"host\\">
+				<h1>{__(\\"Alert\\")}</h1>
+				<Form controls={<div title={__(\\"Подвал\\")}>
+						<Button name={__(\\"submit\\")} text={__(\\"Хорошо\\")}/>
+						<button value={__(\\"Отмена\\")}/>
+					</div>}>
+					<h2>{__(\\"Бла-бла-бла\\")}</h2>
+					<fieldset>
+						<div className=\\"row\\">
+							<div className=\\"col\\">{__(\\"Ширина:\\")}</div>
+							<div className=\\"col\\">123px</div>
+						</div>
+						<div className=\\"row\\">
+							{__.jsx(\\"Да<#1><2/>\\", [{ type: \\"div\\", props: { className: \\"col\\" } }, ' ', { type: \\"input\\", props: { type: \\"checked\\" } }])}
+						</div>
+						<div>
+							{this.innerRender({ ...props, value: __('Тест') })}
+							Окей
+						</div>
+					</fieldset>
+				</Form>
+			</div>);
+    }
+}
 "
 `;

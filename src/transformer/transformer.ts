@@ -205,13 +205,13 @@ function visitNode(node: ts.Node, context, cfg: Config): ts.Node {
 		let phrase = '';
 		let hasText = false;
 
-		node.children.map(function processing(child) {
+		node.children.forEach(function processing(child) {
 			if (ts.isJsxElement(child)) {
 				let part = ++gpart;
 
 				simple = false;
 				phrase += `<${part}>`;
-				child.children.map(processing)
+				child.children.forEach(processing)
 				phrase += `</${part}>`;
 
 				args.push(jsxTagToObject(child, context, cfg));
@@ -220,7 +220,7 @@ function visitNode(node: ts.Node, context, cfg: Config): ts.Node {
 				phrase += child.getFullText().replace(/[\n\t]/g, '');
 			} else if (ts.isJsxExpression(child)) {
 				phrase += `<#${++gpart}>`;
-				args.push(ts.createIdentifier(child.expression.getText()));
+				args.push(visitNode(child.expression, context, cfg));
 			} else if (ts.isJsxSelfClosingElement(child)) {
 				simple = false;
 				phrase += `<${++gpart}/>`;
@@ -325,6 +325,7 @@ function jsxTagToObject(node: ts.JsxElement | ts.JsxSelfClosingElement, context,
 				value ? value : ts.createNull(),
 			));
 		} else if (ts.isJsxSpreadAttribute(prop)) {
+			// log();
 			props.push(ts.createSpreadAssignment(prop.expression));
 		}
 	});

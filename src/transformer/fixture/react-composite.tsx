@@ -22,28 +22,42 @@ export const Form = (props) => {
 	)
 }
 
-export const Dialog = (props) => (
-	<div className="host">
-		<h1>Alert</h1>
-		<Form controls={
-			<div title="Подвал">
-				<Button name="submit" text="Хорошо"/>
-				<button value="Отмена"/>
-			</div>
-		}>
-			<h2>Бла-бла-бла</h2>
-			<fieldset>
-				<div className="row">
-					<div className="col">Ширина:</div>
-					<div className="col">123px</div>
-				</div>
-				<div className="row">
-					<div className="col">
-						Да{' '}
-						<input type="checked"/>
+export class Dialog extends React.Component<any> {
+	innerRender(props) {
+	}
+
+
+	render() {
+		const {props} = this;
+
+		return (
+			<div className="host">
+				<h1>Alert</h1>
+				<Form controls={
+					<div title="Подвал">
+						<Button name="submit" text="Хорошо"/>
+						<button value="Отмена"/>
 					</div>
-				</div>
-			</fieldset>
-		</Form>
-	</div>
-);
+				}>
+					<h2>Бла-бла-бла</h2>
+					<fieldset>
+						<div className="row">
+							<div className="col">Ширина:</div>
+							<div className="col">123px</div>
+						</div>
+						<div className="row">
+							<div className="col">
+								Да{' '}
+								<input type="checked"/>
+							</div>
+						</div>
+						<div>
+							{this.innerRender({...props, value: 'Тест'})}
+							Окей
+						</div>
+					</fieldset>
+				</Form>
+			</div>
+		);
+	}
+}
