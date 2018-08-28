@@ -71,13 +71,16 @@ function useNativeImport(module: ts.ModuleKind) {
 
 function i18nId(cfg: Config, prop?: string) {
 	const importDecl = addImport(cfg.imports, cfg.fnName, cfg.packageName);
-	const id = useNativeImport(cfg.compilerOptions.module)
+	let id: ts.Expression = useNativeImport(cfg.compilerOptions.module)
 		? ts.createIdentifier(cfg.fnName)
 		: ts.getGeneratedNameForNode(importDecl);
 
+	if (!useNativeImport(cfg.compilerOptions.module)) {
+		id = ts.createPropertyAccess(id, 'default');
+	}
+
 	return prop ? ts.createPropertyAccess(id, prop) : id;
 }
-
 
 function visited<T extends ts.Node>(node: T): T {
 	node['__visited__'] = true;

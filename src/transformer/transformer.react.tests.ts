@@ -33,7 +33,7 @@ describe('render', () => {
 				exports,
 				(name) => {
 					if (name === 'tx-i18n') {
-						return i18n;
+						return {default: i18n};
 					} else if (name.substr(0, 2) === './') {
 						return load(name.substr(2));
 					} else {
