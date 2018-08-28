@@ -3,18 +3,19 @@ import * as MemoryFS from 'memory-fs';
 import webpackConfig from './fixture/webpack.config';
 import { Extractor } from './plugin';
 
+const fs = new MemoryFS();
 const localeOutput = `${__dirname}/phrases.js`;
 const compiler = webpack({
 	...webpackConfig,
 	plugins: [
 		new Extractor({
 			output: localeOutput,
+			outputFileSystem: fs,
 		}),
 	],
 });
 
-compiler.outputFileSystem = new MemoryFS();
-
+compiler.outputFileSystem = fs;
 
 it('Extract', async () => {
 	await new Promise((resolve, reject) => {
@@ -28,12 +29,13 @@ it('Extract', async () => {
 			}
 
 			resolve(new Promise(resolve => {
-				expect(JSON.parse(compiler.outputFileSystem.readFileSync(localeOutput) + '')).toEqual([
-					'Рубаха',
-					'Демо',
-					'Привет, <1><#2></1>!',
-					'Мы рады видеть тебя!',
-				]);
+				expect(JSON.parse(compiler.outputFileSystem.readFileSync(localeOutput) + '')).toEqual({
+					'Демо': 'Демо',
+					'Мы рады видеть тебя!': 'Мы рады видеть тебя!',
+					'Привет, <1><#2></1>!': 'Привет, <1><#2></1>!',
+					'Рубаха': 'Рубаха',
+				});
+
 				resolve();
 			}));
 		});

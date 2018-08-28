@@ -15,6 +15,21 @@ exports[`numbers 1`] = `
 "
 `;
 
+exports[`object 1`] = `
+"import __ from \\"tx-i18n\\";
+const short = false;
+const obj = {
+    short,
+    foo: __('bar'),
+    'hello': __('world'),
+    'bar-qux': __('wow'),
+    [\`interpolated \${123}\`]: __('ok'),
+};
+obj['property'] = __('yes');
+obj[\`property: \${321}\`] = __(\`wow\`);
+"
+`;
+
 exports[`simple 1`] = `
 "import __ from \\"tx-i18n\\";
 __('foo');

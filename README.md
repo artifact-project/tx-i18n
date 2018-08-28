@@ -17,7 +17,6 @@ const { i18nTx, i18nExtractor } = require('tx-i18n/webpack');
 
 module.exports = {
 	// ...
-
 	module: {
 		rules: [{
 			test: /\.tsx?$/,
@@ -26,7 +25,7 @@ module.exports = {
 			options: {
 				getCustomTransformers: () => ({
 					before: [
-						i18nTx({}), // <!--- TypeScript i18n Transformer
+						i18nTx({}), // <!--- (1) TypeScript i18n Transformer
 					],
 					after: [],
 				}),
@@ -36,7 +35,7 @@ module.exports = {
 
 	plugins: [
 		new i18nExtractor({
-			output: './locale/default.json', // <!--- Extract original phrases
+			output: './src/locale/default.json', // <!--- (2) Extract original phrases
 		}),
 	],
 };
@@ -45,12 +44,12 @@ module.exports = {
 ##### `app-entry-point.ts`
 
 ```ts
-import { createLocale, setLocale, setLang } from 'tx-i18n';
-import originalPhrases from './locale/default';
-import translatedPhrases from './locale/en';
+import { setLang, setLocale } from 'tx-i18n';
+import defaultLocale from './locale/default';
+import englishLocale from './locale/en';
 
-setLocale('default', createLocale(originalPhrases, originalPhrases));
-setLocale('en', createLocale(originalPhrases, translatedPhrases));
+setLocale('default', defaultLocale);
+setLocale('en', englishLocale);
 
 setLang('en');
 ```

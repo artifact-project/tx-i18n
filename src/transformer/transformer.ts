@@ -1,20 +1,20 @@
 import * as ts from 'typescript';
 
+type HumanTextChecker = (text: string, node: ts.Node) => boolean;
+
 interface Config {
-	isHumanText?: (text: string, node: ts.Node) => boolean;
-	isTranslatableJsxAttribute?: (attr: ts.JsxAttribute, element: ts.JsxOpeningLikeElement) => boolean;
+	isHumanText: HumanTextChecker;
+	isTranslatableJsxAttribute: (attr: ts.JsxAttribute, element: ts.JsxOpeningLikeElement) => boolean;
+	overrideHumanTextChecker?: (isHumanText: HumanTextChecker) => HumanTextChecker;
 	fnName: string;
 	packageName: string
 	fileName: string;
-	imports: {
-		[name:string]: ts.ImportDeclaration;
-	};
 	include: string[];
 	exclude: string[];
 	compilerOptions: ts.CompilerOptions;
-	// importDecls: {
-	// 	[name:string]: ts.ImportDeclaration;
-	// };
+	imports: {
+		[name:string]: ts.ImportDeclaration;
+	};
 }
 
 function log(obj) {
@@ -38,8 +38,12 @@ function savePhrase(value: string) {
 	return value;
 }
 
+export function resetPhrases() {
+	phrases.length = 0;
+}
+
 export function getPhrases() {
-	return phrases;
+	return phrases.sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()));
 }
 
 function createImport(name, path) {
@@ -140,23 +144,38 @@ function visitNode(node: ts.Node, context, cfg: Config): ts.Node {
 		)
 		&& isHumanText(node.getFullText(), node)
 	) {
-		const attr = node.parent
-			? (
-				ts.isJsxAttribute(node.parent)
-					? node.parent
-					: node.parent.parent && ts.isJsxAttribute(node.parent.parent) && node.parent.parent
-			)
-			: null
-		;
-		if (attr) {
-			if (cfg.isTranslatableJsxAttribute(attr, attr.parent.parent)) {
-				return ts.createJsxExpression(undefined, wrapStringLiteral(node, cfg));
+		const {parent} = node;
+
+		if (parent) {
+			if (
+				ts.isPropertyAssignment(parent) && parent.name === node
+				|| ts.isElementAccessExpression(parent)
+			) {
+				return node;
 			}
-			return node;
+
+
+			const attr = ts.isJsxAttribute(parent)
+				? parent
+				: parent.parent && ts.isJsxAttribute(parent.parent) && parent.parent
+			;
+
+			if (attr) {
+				if (cfg.isTranslatableJsxAttribute(attr, attr.parent.parent)) {
+					return ts.createJsxExpression(undefined, wrapStringLiteral(node, cfg));
+				}
+				return node;
+			}
 		}
 
 		return wrapStringLiteral(node, cfg);
 	} else if (ts.isTemplateExpression(node)) {
+		const {parent} = node;
+
+		if (parent && (ts.isComputedPropertyName(parent) || ts.isElementAccessExpression(parent))) {
+			return node;
+		}
+
 		if (
 			node.parent
 			&& node.parent.parent
@@ -320,6 +339,9 @@ export type TXConfig = Partial<Pick<Config,
 	| 'packageName'
 	| 'include'
 	| 'exclude'
+	| 'isHumanText'
+	| 'isTranslatableJsxAttribute'
+	| 'overrideHumanTextChecker'
 >>
 
 export default function transformerFactory(config: TXConfig) {
@@ -333,10 +355,14 @@ export default function transformerFactory(config: TXConfig) {
 				include: null,
 				imports: {},
 				compilerOptions: context.getCompilerOptions(),
-				isHumanText: (value: string) => /[\wа-яё]/.test(value.trim().replace(/\d+([^\s]+)?/g, '')),
+				isHumanText: (value: string) => /[\wа-яё]/.test(value.trim().replace(/\d+([^\s]+)?/g, '').trim()),
 				isTranslatableJsxAttribute: (attr: ts.JsxAttribute) => /^(title|alt|placeholder|value)$/.test(attr.name.getText()),
 				...config,
 			};
+
+			if (cfg.overrideHumanTextChecker) {
+				cfg.isHumanText = cfg.overrideHumanTextChecker(cfg.isHumanText);
+			}
 
 			if (cfg.exclude.some(checkPatterFile, cfg)) {
 				return file;
@@ -346,14 +372,24 @@ export default function transformerFactory(config: TXConfig) {
 				return file;
 			}
 
-			const result = visitNodeAndChildren(file, context, cfg);
+			try {
+				const result = visitNodeAndChildren(file, context, cfg);
 
-			return ts.updateSourceFileNode(
-				result,
-				Object.keys(cfg.imports)
-					.map(name => cfg.imports[name])
-					.concat(result.statements),
-			);
+				try {
+					return ts.updateSourceFileNode(
+						result,
+						Object.keys(cfg.imports)
+							.map(name => cfg.imports[name])
+							.concat(result.statements),
+					);
+				} catch (err) {
+					console.error(`\x1b[31m\n[tx-i18n] [update] ${cfg.fileName}\n---\n${err.toString()}\n\x1b[0m`);
+				return file;
+				}
+			} catch (err) {
+				console.error(`\x1b[31m\n[tx-i18n] [visit] ${cfg.fileName}\n---\n${err.toString()}\n\x1b[0m`);
+				return file;
+			}
 		}
 	}
 }

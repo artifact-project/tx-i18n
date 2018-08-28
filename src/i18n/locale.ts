@@ -20,20 +20,13 @@ export function setLocale(lang: 'default' | string, locale: Locale) {
 	LOCALES[lang] = locale;
 }
 
-export function createLocale(originalPhrases: string[], translatedPhrases: string[]): Locale{
-	return originalPhrases.reduce((locale, phrase, idx) => {
-		locale[phrase] = translatedPhrases.length < idx ? translatedPhrases[idx] : phrase;
-		return locale;
-	}, {});
-}
-
 export function setDefaultLocale(locale: Locale) {
 	setLocale('default', locale);
 }
 
-export function getTranslate(phrase: string) {
-	if (LOCALES.hasOwnProperty(LANG) && LOCALES[LANG].hasOwnProperty(phrase)) {
-		return LOCALES[LANG][phrase];
+export function getTranslate(phrase: string, lang = LANG) {
+	if (LOCALES.hasOwnProperty(lang) && LOCALES[lang].hasOwnProperty(phrase)) {
+		return LOCALES[lang][phrase];
 	}
 
 	// todo: warning not translated phrase

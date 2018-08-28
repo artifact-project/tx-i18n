@@ -40,6 +40,7 @@ export function createCompiler(cfg: CompilerConfig) {
 			}
 		}
 
+		write('');
 		write(cfg.before(), 'inc');
 
 		for (let i = 0; i < tokens.length; i += 4) {
@@ -57,9 +58,9 @@ export function createCompiler(cfg: CompilerConfig) {
 			} else if (selfClosed) {
 				write(cfg.selfClose(`__parts__[${partIdx}]`, partIdx));
 			} else if (type === '/') {
-				write(cfg.close(`__parts__[${partIdx}]`, partIdx));
+				write(cfg.close(`__parts__[${partIdx}]`, partIdx), 'dec');
 			} else if (partIdx) {
-				write(cfg.open(`__parts__[${partIdx}]`, partIdx));
+				write(cfg.open(`__parts__[${partIdx}]`, partIdx), 'inc');
 			}
 		}
 

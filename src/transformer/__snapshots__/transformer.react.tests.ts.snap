@@ -1,20 +1,5 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`''; 1`] = `
-"'';
-"
-`;
-
-exports[`numbers 1`] = `
-"'1';
-'2px';
-'3%';
-'4vh';
-'5 + 6';
-'123:35-dm:214';
-"
-`;
-
 exports[`render react react: ClickHere 1`] = `
 <div>
   Привет 
@@ -109,25 +94,6 @@ exports[`render react-composite react-composite: Dialog 1`] = `
     </fieldset>
   </form>
 </div>
-`;
-
-exports[`simple 1`] = `
-"import __ from \\"tx-i18n\\";
-__('foo');
-__('бар');
-"
-`;
-
-exports[`template 1`] = `
-"import __ from \\"tx-i18n\\";
-__(\`simple\`);
-__(\\"<#0>\\", [__('str')]);
-__(\\"before: <#0>\\", [1]);
-__(\\"<#0>: after\\", [2]);
-__(\\"<#0> middle <#1>\\", [__('before'), 4]);
-__(\\"foo <#0> baz\\", [__('бар')]);
-__(\\"<#0> шесть <#1> восемь\\", [5, 7]);
-"
 `;
 
 exports[`transform react 1`] = `
