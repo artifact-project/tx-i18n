@@ -2,14 +2,14 @@ import { getTranslate } from '../i18n/locale';
 import { createCompiler } from '../i18n/compiler';
 
 type JsxElement = {
-	type: string;
+	type: string | Function;
 	props: {
 		children: Array<JsxElement | string>;
 		[key:string]: any;
 	};
 }
 
-export function jsxFactory(create: (type: string, props: object, ...children: any[]) => JsxElement) {
+export function jsxFactory(create: (type: string | Function, props: object, ...children: any[]) => JsxElement) {
 	const compile = createCompiler({
 		inject: {
 			__CREATE__: create,
@@ -23,11 +23,24 @@ export function jsxFactory(create: (type: string, props: object, ...children: an
 		open: (part) => `__CREATE__(${part}.type, ${part}.props,`,
 		close: () => '),',
 	});
+	let Wrapper = null;
 
-	return function jsx(phrase: string, parts) {
+	function jsx(phrase: string, parts) {
 		const translatePhrase = getTranslate(phrase);
 		const compiledPhrase = compile(translatePhrase);
 
-		return compiledPhrase(parts);
+		return Wrapper
+			? create(Wrapper, {value: () => compiledPhrase(parts)})
+			: compiledPhrase(parts)
+		;
+	}
+
+	jsx['useWrapper'] = (Cmp) => {
+		Wrapper = Cmp;
+	};
+
+	return jsx as {
+		(phrase: string, parts: any[]): JsxElement;
+		useWrapper: (Cmp: Function) => void;
 	};
 }
