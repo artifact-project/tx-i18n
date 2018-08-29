@@ -7,8 +7,8 @@ export const DeepHello = (props) => {
 	</div>
 };
 
-export const Button = ({name, text}) => {
-	return <button name={name} value={text}/>
+export const Button = ({name, text, hint}) => {
+	return <button name={name} value={text} title={hint}/>
 }
 
 export const Form = (props) => {
@@ -35,8 +35,12 @@ export class Dialog extends React.Component<any> {
 				<h1>Alert</h1>
 				<Form controls={
 					<div title="Подвал">
-						<Button name="submit" text="Хорошо"/>
-						<button value="Отмена"/>
+						<Button
+							name="submit"
+							text="Хорошо"
+							hint={`Подсказка: ${123}!`}
+						/>
+						<button value="Отмена" data-id={`рав-текст`}/>
 					</div>
 				}>
 					<h2>Бла-бла-бла</h2>

@@ -119,7 +119,7 @@ function wrapTemplateExpression(node: ts.TemplateExpression, context, cfg: Confi
 	let phrase = node.head.text;
 
 	node.templateSpans.forEach((span, idx) => {
-		phrase += `<#${idx}>${span.literal.text}`;
+		phrase += `<#${(idx + 1)}>${span.literal.text}`;
 		args.push(visitNodeAndChildren(span.expression, context, cfg));
 	});
 
@@ -192,7 +192,10 @@ function visitNode(node: ts.Node, context, cfg: Config): ts.Node {
 			node.parent
 			&& node.parent.parent
 			&& ts.isJsxAttribute(node.parent.parent)
-			&& !cfg.isTranslatableJsxAttribute(node.parent.parent, node.parent.parent.parent.parent)
+			&& (
+				!cfg.isTranslatableJsxAttribute(node.parent.parent, node.parent.parent.parent.parent)
+				&& isTagName(node.parent.parent.parent.parent.tagName.getText())
+			)
 		) {
 			return node;
 		}
@@ -211,10 +214,9 @@ function visitNode(node: ts.Node, context, cfg: Config): ts.Node {
 
 				simple = false;
 				phrase += `<${part}>`;
+				args.push(jsxTagToObject(child, context, cfg));
 				child.children.forEach(processing)
 				phrase += `</${part}>`;
-
-				args.push(jsxTagToObject(child, context, cfg));
 			} else if (ts.isJsxText(child)) {
 				hasText = true;
 				phrase += child.getFullText().replace(/[\n\t]/g, '');
@@ -229,7 +231,7 @@ function visitNode(node: ts.Node, context, cfg: Config): ts.Node {
 				log(child);
 				throw new Error('Not supproted');
 			}
-		});
+		}, args);
 
 		phrase = phrase.trim();
 
@@ -321,7 +323,7 @@ function jsxTagToObject(node: ts.JsxElement | ts.JsxSelfClosingElement, context,
 			}
 
 			props.push(ts.createPropertyAssignment(
-				name,
+				stringifyObjectKey(name),
 				value ? value : ts.createNull(),
 			));
 		} else if (ts.isJsxSpreadAttribute(prop)) {
@@ -345,6 +347,11 @@ function jsxTagToObject(node: ts.JsxElement | ts.JsxSelfClosingElement, context,
 
 function checkPatterFile(this: Config, mask: string) {
 	return this.fileName.match(mask) !== null;
+}
+
+const R_IS_SIMPLE_OBJ_KEY = /^[a-z\d_]+$/i;
+function stringifyObjectKey(name: string) {
+	return R_IS_SIMPLE_OBJ_KEY.test(name) ? name : JSON.stringify(name)
 }
 
 export type TXConfig = Partial<Pick<Config,

@@ -101,9 +101,11 @@ exports[`render react-composite react-composite: Dialog 1`] = `
       >
         <button
           name="submit"
+          title="Подсказка: 123!"
           value="OK"
         />
         <button
+          data-id="рав-текст"
           value="Cancel"
         />
       </div>
@@ -119,10 +121,10 @@ export const Static = () => (<div className={'host'}>{__(\\"Вова, купи \
 export const Hello = ({ username }) => (<div className={\`host\`}>{__(\\"Привет <#1>-кун!1\\", [username])}</div>);
 export const ClickHere = ({ username }) => (__.jsx(\\"Привет <#1>, нажми <2>здесь</2> чтобы продолжить.\\", [{ type: \\"div\\", props: null }, username, { type: \\"a\\", props: { href: \\"#\\" } }]));
 export const Input = ({ hint, mode }) => (<div className={\`input \${mode}\`}>
-		<input placeholder={__(\\"Подсказка: <#0>\\", [hint])}/>
+		<input placeholder={__(\\"Подсказка: <#1>\\", [hint])}/>
 		<button value={__(\\"Войти\\")}/>
 	</div>);
-export const InputWithText = ({ hint, mode }) => (__.jsx(\\"Представьтесь:<1/><2/>\\", [{ type: \\"div\\", props: { className: \`input \${mode}\` } }, { type: \\"input\\", props: { placeholder: __(\\"Подсказка: <#0>\\", [hint]) } }, { type: \\"button\\", props: { value: __(\\"Войти\\") } }]));
+export const InputWithText = ({ hint, mode }) => (__.jsx(\\"Представьтесь:<1/><2/>\\", [{ type: \\"div\\", props: { className: \`input \${mode}\` } }, { type: \\"input\\", props: { placeholder: __(\\"Подсказка: <#1>\\", [hint]) } }, { type: \\"button\\", props: { value: __(\\"Войти\\") } }]));
 "
 `;
 
@@ -133,8 +135,8 @@ import { Hello } from './react';
 export const DeepHello = (props) => {
     return __.jsx(\\"<1/> или Нет!\\", [{ type: \\"div\\", props: null }, { type: Hello, props: { ...props } }]);
 };
-export const Button = ({ name, text }) => {
-    return <button name={name} value={text}/>;
+export const Button = ({ name, text, hint }) => {
+    return <button name={name} value={text} title={hint}/>;
 };
 export const Form = (props) => {
     return (<form>
@@ -152,8 +154,8 @@ export class Dialog extends React.Component {
         return (<div className=\\"host\\">
 				<h1>{__(\\"Alert\\")}</h1>
 				<Form controls={<div title={__(\\"Подвал\\")}>
-						<Button name={__(\\"submit\\")} text={__(\\"Хорошо\\")}/>
-						<button value={__(\\"Отмена\\")}/>
+						<Button name={__(\\"submit\\")} text={__(\\"Хорошо\\")} hint={__(\\"Подсказка: <#1>!\\", [123])}/>
+						<button value={__(\\"Отмена\\")} data-id={\`рав-текст\`}/>
 					</div>}>
 					<h2>{__(\\"Бла-бла-бла\\")}</h2>
 					<fieldset>
