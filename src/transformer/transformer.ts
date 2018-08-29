@@ -221,6 +221,7 @@ function visitNode(node: ts.Node, context, cfg: Config): ts.Node {
 				hasText = true;
 				phrase += child.getFullText().replace(/[\n\t]/g, '');
 			} else if (ts.isJsxExpression(child)) {
+				simple = false;
 				phrase += `<#${++gpart}>`;
 				args.push(visitNode(child.expression, context, cfg));
 			} else if (ts.isJsxSelfClosingElement(child)) {
