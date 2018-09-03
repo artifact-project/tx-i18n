@@ -1,12 +1,13 @@
 import * as React from 'react';
 import { addLangObserver } from '../i18n/locale';
 
-export class Wrapper extends React.Component<{value: Function}> {
+export class Wrapper extends React.Component<{value: Function}, {lang: string}> {
 	private unsubscribe: () => void;
+	state = {lang: ''};
 
 	componentDidMount() {
-		this.unsubscribe = addLangObserver(() => {
-			this.forceUpdate();
+		this.unsubscribe = addLangObserver((lang) => {
+			this.setState({lang});
 		});
 	}
 
@@ -14,8 +15,8 @@ export class Wrapper extends React.Component<{value: Function}> {
 		this.unsubscribe();
 	}
 
-	shouldComponentUpdate() {
-		return false;
+	shouldComponentUpdate(_, nextState) {
+		return nextState.lang !== this.state.lang;
 	}
 
 	render() {

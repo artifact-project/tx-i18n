@@ -8,6 +8,21 @@ npm i --save-dev tx-i18n
 
 ---
 
+### Feature
+
+- No additional markup
+- Pluralization by [CLDR](http://www.unicode.org/cldr/charts/latest/supplemental/language_plural_rules.html#en)
+- Fastest (see [benchmarks](./__bench__/))
+- Context (todo)
+- Support
+  - Litteral strings
+  - Template strings
+  - TSX/React: Text, Expression, Attributes, Tags (any complexity)
+  - **Not supproted**
+    - Object keys
+
+---
+
 ### Usage with webpack
 
 ##### `webpack.config.js`
@@ -35,7 +50,7 @@ module.exports = {
 
 	plugins: [
 		new i18nExtractor({
-			output: './src/locale/default.json', // <!--- (2) Extract original phrases
+			output: './src/locale/default.js', // <!--- (2) Extract original phrases
 		}),
 	],
 };
@@ -45,13 +60,98 @@ module.exports = {
 
 ```ts
 import { setLang, setLocale } from 'tx-i18n';
-import defaultLocale from './locale/default';
-import englishLocale from './locale/en';
+import locale from './locale/en';
 
-setLocale('default', defaultLocale);
-setLocale('en', englishLocale);
-
+setLocale('en', locale);
 setLang('en');
+```
+
+---
+
+### API
+
+#### i18nTx
+
+Is a magic typescript transformer ;]
+
+- **fnName**: `string` — the name of the function that will be used to wrap strings. (optional, default: `__`)
+- **packageName**: `string` — the name of the package from which will be exported as default the function with the name `fnName`. (optional, default: `tx-i18n`)
+- **include**: `Array<string|regexp>` — an array of files or paths that need for a transform. (optional)
+- **exclude**: `Array<string|regexp>` — an array of files or paths that need to exclude for a transform. (optional)
+- **isHummanText**: `(text: string, node: ts.Node) => boolean` — (optional)
+- **isTranslatableJsxAttribute**: `(attr: ts.JsxAttribute, elem: ts.JsxElement) => boolean` — (optional)
+- **overrideHumanTextChecker**: `(isHummanText: HumanTextChecker) => HumanTextChecker` — (optional)
+
+---
+
+#### i18nExtractor
+
+Is a webpack plugin for save all phrases to translate
+
+- **output**: `string` — filename
+  - `.json` — save as `json`
+  - If you use `.ts` or `.js`, file will be saved as ES Module.
+- **stringify**: `(locale: Locale) => string` — convertor to json before save (optional)
+- **indent**: `string` — `  ` (optional)
+
+---
+
+### How it works
+
+Using the [Compiler API](https://github.com/Microsoft/TypeScript/wiki/Using-the-Compiler-API), `i18Tx` traversing the AST-tree and wrap the text nodes a special function + add the import of this function, it looks like this:
+
+#### Simple text
+
+```ts
+// Original
+const text = 'Hello world';
+
+// Transformed
+import __ from 'tx-i18n';
+const text = __('Hello world');
+```
+
+#### Literal template
+
+```ts
+// Original
+const text = `Hi, ${username}!`;
+
+// Transformed
+import __ from 'tx-i18n';
+const text = __('Hi, <#1>', [username]);
+```
+
+#### TSX / React
+
+```tsx
+// Original
+const Fragment = () => (
+	<div title="This is fragment" data-name="frag">
+		<h1>Fragment of HTML</h1>
+		<div>
+			Click <a href="#help" title="How to use tx-i18n">here</a> for detail.
+		</div>
+	</div>
+);
+
+// Transformed
+import __ from 'tx-i18n';
+const Fragment = () => (
+	<div title={__('This is fragment')} data-name="frag">
+		<h1>{__('Fragment pf HTML')}</h1>
+		{__.jsx('Click <1>here</1> for detail.', [
+			{type: 'div', props: {}},
+			{
+				type: 'a',
+				props: {
+					href: '#help'
+					title: __('How to use tx-i18n'),
+				},
+			},
+		])}
+	</div>
+);
 ```
 
 ---
