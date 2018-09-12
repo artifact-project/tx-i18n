@@ -50,7 +50,7 @@ module.exports = {
 
 	plugins: [
 		new i18nExtractor({
-			output: './src/locale/default.js', // <!--- (2) Extract original phrases
+			output: './src/locale/__default__.ts', // <!--- (2) Extract original phrases as ES Module
 		}),
 	],
 };
@@ -64,6 +64,15 @@ import locale from './locale/en';
 
 setLocale('en', locale);
 setLang('en');
+```
+
+##### `./src/locale/__default__.ts`
+
+```ts
+export default {
+	'Hi, <#1>!': 'Hi, <#1>!',
+	'Click <1>here</1> for help': 'Click <1>here</1> for help',
+];
 ```
 
 ---
@@ -124,7 +133,7 @@ const text = __('Hi, <#1>', [username]);
 
 #### TSX / React
 
-```tsx
+```jsx
 // Original
 const Fragment = () => (
 	<div title="This is fragment" data-name="frag">

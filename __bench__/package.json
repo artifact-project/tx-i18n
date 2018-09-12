@@ -1,0 +1,8 @@
+{
+  "private": true,
+  "main": "bench.js",
+  "scripts": {
+    "test": "node bench.js"
+  },
+  "license": "MIT"
+}
