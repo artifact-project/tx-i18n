@@ -95,6 +95,13 @@ const Page = ({name, t}) => (
 	</div>
 );
 
+// src/translate/default.ts     (!!!)
+export default {
+	pageHeader: 'Page Header',
+	welcome: 'Hi, <1><0>{{name}}</0></1>.',
+	titleOpen: 'Open',
+};
+
 // src/translate/ru.ts
 export default {
 	pageHeader: 'Заголовок страницы',
