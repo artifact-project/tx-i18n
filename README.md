@@ -72,7 +72,7 @@ setLang('en');
 export default {
 	'Hi, <#1>!': 'Hi, <#1>!',
 	'Click <1>here</1> for help': 'Click <1>here</1> for help',
-];
+};
 ```
 
 ---
