@@ -10,10 +10,10 @@ npm i --save-dev tx-i18n
 
 ### Feature
 
-- No additional markup
-- Pluralization by [CLDR](http://www.unicode.org/cldr/charts/latest/supplemental/language_plural_rules.html#en)
+- No additional markup (Just [compare](./COMPARE.md) with react-intl or react-i18next)
 - Fastest (see [benchmarks](./__bench__/))
 - Context (todo)
+- Pluralization by [CLDR](http://www.unicode.org/cldr/charts/latest/supplemental/language_plural_rules.html#en) (todo)
 - Support
   - Litteral strings
   - Template strings
@@ -78,6 +78,43 @@ export default {
 ---
 
 ### API
+
+##### getLang(): string
+Get a current lang.
+
+---
+
+##### setLang(lang)
+Change a current lang.
+
+- **lang**: `string`
+
+---
+
+##### setLocale(lang, locale)
+Set a locale for a lang.
+
+- **lang**: `string`
+- **locale**: `Locale`
+
+---
+
+##### addLangObserver(listener): unobserve
+Add an observer on a lang changes.
+
+- **listener**: `(lang, prevLang) => void`
+
+---
+
+##### getTranslate(phrase[, lang]): string
+Get a translate for a phrase.
+
+- **phrase**: `string`
+- **lang**: `string`
+
+---
+
+### Internal API
 
 #### i18nTx
 
@@ -148,7 +185,7 @@ const Fragment = () => (
 import __ from 'tx-i18n';
 const Fragment = () => (
 	<div title={__('This is fragment')} data-name="frag">
-		<h1>{__('Fragment pf HTML')}</h1>
+		<h1>{__('Fragment of HTML')}</h1>
 		{__.jsx('Click <1>here</1> for detail.', [
 			{type: 'div', props: {}},
 			{

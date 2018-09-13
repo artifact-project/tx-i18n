@@ -23,7 +23,7 @@ function i18n(phrase: string, parts: any[]) {
 i18n['jsx'] = jsxFactory(createElement);
 
 export default i18n as {
-	(pharse: string, parts: any[]): string;
+	(pharse: string, parts?: any[]): string;
 	jsx: {
 		(pharse: string, parts: any[]): any;
 		useWrapper: (Cmp: Function) => void;
