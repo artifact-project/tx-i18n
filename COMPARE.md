@@ -66,6 +66,10 @@ const Page = ({name}, {intl}) => (
 	</div>
 );
 
+Page.contextTypes = {
+	intl: PropTypes.object.isRequired,
+};
+
 // src/translate/ru.ts
 export default {
 	pageHeader: 'Заголовок страницы',
