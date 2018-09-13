@@ -165,7 +165,7 @@ const text = `Hi, ${username}!`;
 
 // Transformed
 import __ from 'tx-i18n';
-const text = __('Hi, <#1>', [username]);
+const text = __('Hi, <#1>!', [username]);
 ```
 
 #### TSX / React
