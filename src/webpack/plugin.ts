@@ -1,10 +1,10 @@
 import { writeFileSync } from 'fs';
-import { getPhrases, resetPhrases } from '../transformer/transformer';
+import { getPhrases, resetPhrases, Pharse } from '../transformer/transformer';
 import { Compiler } from 'webpack';
 import { Locale } from '../i18n/locale';
 
 type ExtractorOptions = {
-	output: string;
+	output: string | Array<(phrases: Pharse[]) => {file: string; values: string[];}>;
 	indent?: string;
 	stringify?: (json: Locale) => string;
 	outputFileSystem?: {
@@ -13,7 +13,7 @@ type ExtractorOptions = {
 }
 
 export class Extractor {
-	private _content = '';
+	private _cache = {};
 	private _watchMode = false;;
 
 	constructor(private options: ExtractorOptions) {
@@ -30,41 +30,56 @@ export class Extractor {
 	}
 
 	private save() {
-		const {
+		const phrases = getPhrases();
+		let {
 			output,
 			indent = '  ',
 			stringify,
-		} = this.options;;
-		const locale = getPhrases().reduce((locale, phrase) => {
-			locale[phrase] = phrase;
-			return locale;
-		}, {});
-		let content = '';
+		} = this.options;
 
-		if (stringify) {
-			content = stringify(locale);
-		} else {
-			content = (
-				'{\n' +
-					Object
-						.keys(locale)
-						.map(key => `${indent}${JSON.stringify(key)}: ${JSON.stringify(locale[key])}`)
-						.join(',\n') +
-				'\n}'
-			);
+		if (typeof output === 'string') {
+			const file = output;
+			output = [() => ({
+				file,
+				values: phrases.map(phrase => phrase.value)
+			})]
+		}
 
-			if (/\.[tj]sx?$/.test(output)) {
-				content = `export default ${content};`;
+		output.forEach((get) => {
+			const {values, file} = get(phrases)
+			const locale = values
+				.sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()))
+				.reduce((locale, phrase) => {
+					locale[phrase] = phrase;
+					return locale;
+				}, {});
+			let content = '';
+
+			if (stringify) {
+				content = stringify(locale);
+			} else {
+				content = (
+					'{\n' +
+						Object
+							.keys(locale)
+							.map(key => `${indent}${JSON.stringify(key)}: ${JSON.stringify(locale[key])}`)
+							.join(',\n') +
+					'\n}'
+				);
+
+				if (/\.[tj]sx?$/.test(file)) {
+					content = `export default ${content};`;
+				}
 			}
-		}
 
-		if (this._content !== content) {
-			this._content = content;
-			this.options.outputFileSystem.writeFileSync(
-				output,
-				content,
-			);
-		}
+			if (this._cache[file] !== content) {
+				this._cache[file] = content;
+				this.options.outputFileSystem.writeFileSync(
+					file,
+					content,
+				);
+			}
+		});
 	}
 
 	apply(compiler: Compiler) {

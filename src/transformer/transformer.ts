@@ -15,6 +15,7 @@ interface Config {
 	imports: {
 		[name:string]: ts.ImportDeclaration;
 	};
+	sourceFile: ts.SourceFile;
 }
 
 function log(obj) {
@@ -28,14 +29,32 @@ function log(obj) {
 	console.log(copy);
 }
 
-const phrases: string[] = [];
+export type Pharse = {
+	value: string;
+	file: string;
+	loc: {
+		start: {
+			line: number;
+			character: number;
+		};
+		end: {
+			line: number;
+			character: number;
+		};
+	};
+}
 
-function savePhrase(value: string) {
-	if (phrases.indexOf(value) === -1) {
-		phrases.push(value);
-	}
+const phrases: Pharse[] = [];
 
-	return value;
+function savePhrase(value: string, node: ts.Node, {sourceFile}: Config) {
+	phrases.push({
+		value,
+		file: sourceFile.fileName,
+		loc: {
+			start: sourceFile.getLineAndCharacterOfPosition(node.getStart()),
+			end: sourceFile.getLineAndCharacterOfPosition(node.getEnd()),
+		},
+	});
 }
 
 export function resetPhrases() {
@@ -43,7 +62,7 @@ export function resetPhrases() {
 }
 
 export function getPhrases() {
-	return phrases.sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()));
+	return phrases;
 }
 
 function createImport(name, path) {
@@ -107,7 +126,7 @@ function wrapStringLiteral(node: ts.StringLiteralLike, cfg: Config) {
 		return visited(node);
 	}
 
-	savePhrase(text.slice(1, -1));
+	savePhrase(text.slice(1, -1), node, cfg);
 
 	return ts.createCall(i18nId(cfg), [], [
 		ts.createIdentifier(text),
@@ -127,7 +146,7 @@ function wrapTemplateExpression(node: ts.TemplateExpression, context, cfg: Confi
 		return visited(node);
 	}
 
-	savePhrase(phrase);
+	savePhrase(phrase, node, cfg);
 
 	return ts.createCall(i18nId(cfg), [], [
 		createLiteral(phrase),
@@ -240,7 +259,7 @@ function visitNode(node: ts.Node, context, cfg: Config): ts.Node {
 			return node;
 		}
 
-		savePhrase(phrase);
+		savePhrase(phrase, node, cfg);
 
 		if (simple) {
 			return ts.updateJsxElement(
@@ -378,6 +397,7 @@ export default function transformerFactory(config: TXConfig) {
 				compilerOptions: context.getCompilerOptions(),
 				isHumanText: (value: string) => /[\wа-яё]/.test(value.trim().replace(/\d+([^\s]+)?/g, '').trim()),
 				isTranslatableJsxAttribute: (attr: ts.JsxAttribute) => /^(title|alt|placeholder|value)$/.test(attr.name.getText()),
+				sourceFile: file,
 				...config,
 			};
 
