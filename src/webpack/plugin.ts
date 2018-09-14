@@ -4,7 +4,7 @@ import { Compiler } from 'webpack';
 import { Locale } from '../i18n/locale';
 
 type ExtractorOptions = {
-	output: string | Array<(phrases: Pharse[]) => {file: string; values: string[];}>;
+	output: string | Array<(phrases: Pharse[]) => {file: string; phrases: Pharse[];}>;
 	indent?: string;
 	stringify?: (json: Locale) => string;
 	outputFileSystem?: {
@@ -30,7 +30,7 @@ export class Extractor {
 	}
 
 	private save() {
-		const phrases = getPhrases();
+		const originalPhrases = getPhrases();
 		let {
 			output,
 			indent = '  ',
@@ -41,13 +41,14 @@ export class Extractor {
 			const file = output;
 			output = [() => ({
 				file,
-				values: phrases.map(phrase => phrase.value)
+				phrases: originalPhrases,
 			})]
 		}
 
 		output.forEach((get) => {
-			const {values, file} = get(phrases)
-			const locale = values
+			const {phrases, file} = get(originalPhrases);
+			const locale = phrases
+				.map(phrase => phrase.value)
 				.sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()))
 				.reduce((locale, phrase) => {
 					locale[phrase] = phrase;

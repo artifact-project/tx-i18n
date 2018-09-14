@@ -134,7 +134,7 @@ Is a magic typescript transformer ;]
 
 Is a webpack plugin for save all phrases to translate
 
-- **output**: `string | Array<(phases: Pharse[]) => {file: string; values: string[];}>` — the filename or an array of getters for separation `phrases` by files.
+- **output**: `string | Array<(phases: Pharse[]) => {file: string; phases: Phrase[];}>` — the filename or an array of getters for separation `phrases` by files.
   - `.json` — save as `json`
   - If you use `.ts` or `.js`, file will be saved as ES Module.
 - **stringify**: `(locale: Locale) => string` — convertor to json before save (optional)
