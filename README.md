@@ -50,9 +50,41 @@ module.exports = {
 
 	plugins: [
 		new i18nExtractor({
-			output: './src/locale/__default__.ts', // <!--- (2) Extract original phrases as ES Module
+			phrasesOutput: './src/locale/__default__.ts', // <!--- (2) Extract original phrases as ES Module
+			pluralOutput: './src/locale/__plural__.ts', // <!--- (3) Extract original prlural as ES Module
 		}),
 	],
+};
+```
+
+##### `./src/locale/en.ts`
+Based on `./src/locale/__default__.ts`
+
+```ts
+export default { // [context] -> [phrase] -> [translate]
+	default: {
+		'Привет, <#1>!': 'Hi, <#1>!',
+		'Нажмите <1>здесь</1> для получения помощи': 'Click <1>here</1> for help',
+	},
+	anonymous: {
+		// ...
+	},
+};
+```
+
+##### `./src/locale/en.plural.ts`
+Based on `./src/locale/__plural__.ts`
+
+```ts
+export default {
+	default: {
+		messages: {
+			cardinal: {
+				one: 'symbol',
+				other: 'symbols',
+			},
+		},
+	},
 };
 ```
 
@@ -64,15 +96,6 @@ import locale from './locale/en';
 
 setLocale('en', locale);
 setLang('en');
-```
-
-##### `./src/locale/__default__.ts`
-
-```ts
-export default {
-	'Hi, <#1>!': 'Hi, <#1>!',
-	'Click <1>here</1> for help': 'Click <1>here</1> for help',
-};
 ```
 
 ---
@@ -172,11 +195,13 @@ const text = __('Hi, <#1>!', [username]);
 
 ```jsx
 // Original
-const Fragment = () => (
+import __ from 'tx-i18n';
+const Fragment = ({name, count}) => (
 	<div title="This is fragment" data-name="frag">
 		<h1>Fragment of HTML</h1>
 		<div>
-			Click <a href="#help" title="How to use tx-i18n">here</a> for detail.
+			Hi, <a href="#account" title="Open">{name}</a>, your have {count}
+			unread {__.plural('messages', count)}.
 		</div>
 	</div>
 );
