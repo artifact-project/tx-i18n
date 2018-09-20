@@ -83,7 +83,7 @@ export default {
 
 ### Context
 
-```tsx
+```jsx
 const dict = {
 	firstName: 'Имя',
 	lastName: 'Фамилия',
@@ -95,11 +95,13 @@ const personalDict = {
 	lastName: 'Фамилия',
 };
 
-const Form = () => (
-	{/** @tx-i18n context: personal */}
+const Dialog = () => (
 	<div>
-		<h1>Ваши данные</h1>
-		<form>...</form>
+		{/** @tx-i18n context: personal */}
+		<form>
+			<h1>Ваши данные</h1>
+			<fieldset>...</fieldset>
+		</form>
 	</div>
 );
 ```
