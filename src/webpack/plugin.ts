@@ -1,12 +1,17 @@
 import { writeFileSync } from 'fs';
-import { getPhrases, resetPhrases, Pharse } from '../transformer/transformer';
+import { getPhrases, resetPhrases, Pharse, ContextedPhrases } from '../transformer/transformer';
 import { Compiler } from 'webpack';
-import { Locale } from '../i18n/locale';
+import { Locale, ContextedLocale } from '../i18n/locale';
 
-type ExtractorOptions = {
-	output: string | ((phrases: Pharse[]) => Array<{file: string; phrases: Pharse[];}>);
+export type ExtractorSeparateOutput = (phrases: ContextedPhrases) => Array<{
+	file: string;
+	phrases: ContextedPhrases;
+}>
+
+export type ExtractorOptions = {
+	output: string | ExtractorSeparateOutput;
 	indent?: string;
-	stringify?: (json: Locale) => string;
+	stringify?: (locale: ContextedLocale) => string;
 	outputFileSystem?: {
 		writeFileSync(filename: string, content: string): void
 	};
@@ -34,6 +39,7 @@ export class Extractor {
 			return;
 		}
 
+		const jstr = JSON.stringify;
 		let {
 			output,
 			indent = '  ',
@@ -48,27 +54,36 @@ export class Extractor {
 			}];
 		}
 
-		output(getPhrases()).forEach(({file, phrases}) => {
-			const locale = phrases
-				.map(phrase => phrase.value)
-				.sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()))
-				.reduce((locale, phrase) => {
-					locale[phrase] = phrase;
-					return locale;
-				}, {});
+		output(getPhrases()).forEach(({file, phrases:contextedPhrases}) => {
+			const ctxLocale = Object.keys(contextedPhrases).reduce((contexted, context) => {
+				contexted[context] = contextedPhrases[context]
+					.map(phrase => phrase.value)
+					.sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()))
+					.reduce((locale, phrase) => {
+						locale[phrase] = phrase;
+						return locale;
+					}, {});
+
+				return contexted;
+			}, {} as ContextedLocale);
+
 			let content = '';
 
 			if (stringify) {
-				content = stringify(locale);
+				content = stringify(ctxLocale);
 			} else {
-				content = (
-					'{\n' +
-						Object
-							.keys(locale)
-							.map(key => `${indent}${JSON.stringify(key)}: ${JSON.stringify(locale[key])}`)
-							.join(',\n') +
-					'\n}'
-				);
+				content = '{\n' + Object.keys(ctxLocale).map((context) => {
+					const locale = ctxLocale[context];
+
+					return (
+						`${indent}${jstr(context)}: {\n` +
+							Object
+								.keys(locale)
+								.map(key => `${indent}${indent}${jstr(key)}: ${jstr(locale[key])}`)
+								.join(',\n') +
+						`${indent}\n}`
+					);
+				}).join(',') + '\n}';
 
 				if (/\.[tj]sx?$/.test(file)) {
 					content = `export default ${content};`;

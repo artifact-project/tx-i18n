@@ -44,6 +44,7 @@ export class Dialog extends React.Component<any> {
 					</div>
 				}>
 					<h2>Бла-бла-бла</h2>
+					{/** @tx-i18n context: form */}
 					<fieldset>
 						<div className="row">
 							<div className="col">Ширина:</div>
@@ -59,6 +60,7 @@ export class Dialog extends React.Component<any> {
 							{this.innerRender({...props, value: 'Тест'})}
 							Окей
 						</div>
+						<button value="Отмена" />
 					</fieldset>
 				</Form>
 			</div>

@@ -11,6 +11,7 @@ interface Config {
 	fileName: string;
 	include: string[];
 	exclude: string[];
+	pharsesStore?: ContextedPhrases;
 	compilerOptions: ts.CompilerOptions;
 	imports: {
 		[name:string]: ts.ImportDeclaration;
@@ -32,6 +33,7 @@ function log(obj) {
 export type Pharse = {
 	value: string;
 	file: string;
+	ctx: string;
 	loc: {
 		start: {
 			line: number;
@@ -44,10 +46,52 @@ export type Pharse = {
 	};
 }
 
-const phrases: Pharse[] = [];
+export type ContextedPhrases = {
+	[context: string]: Pharse[];
+}
+
+export function contextedPhrasesForEach(
+	phrases: ContextedPhrases,
+	iterator: (phrase: Pharse, ctx: string) => void,
+) {
+	Object.keys(phrases).forEach((ctx) => {
+		phrases[ctx].forEach((phrase) => {
+			iterator(phrase, ctx);
+		});
+	})
+}
+
+export function contextedPhrasesFilter(
+	phrases: ContextedPhrases,
+	filter: (phrase: Pharse, ctx: string) => boolean,
+) {
+	const filteredPhrases = {} as ContextedPhrases;
+
+	contextedPhrasesForEach(phrases, (phrase, ctx) => {
+		if (filter(phrase, ctx)) {
+			if (!filteredPhrases.hasOwnProperty(ctx)) {
+				filteredPhrases[ctx] = [];
+			}
+
+			filteredPhrases[ctx].push(phrase);
+		}
+	});
+
+	return filteredPhrases;
+}
+
+let phrasesContext: string[];;
+let phrasesWithContext: ContextedPhrases = {};
 
 function savePhrase(value: string, node: ts.Node, {sourceFile}: Config) {
-	phrases.push({
+	const context = phrasesContext[0];
+
+	if (!phrasesWithContext.hasOwnProperty(context)) {
+		phrasesWithContext[context] = [];
+	}
+
+	phrasesWithContext[context].push({
+		ctx: context,
 		value,
 		file: sourceFile.fileName,
 		loc: {
@@ -58,11 +102,13 @@ function savePhrase(value: string, node: ts.Node, {sourceFile}: Config) {
 }
 
 export function resetPhrases() {
-	phrases.length = 0;
+	Object.keys(phrasesWithContext).forEach(key => {
+		delete phrasesWithContext[key];
+	});
 }
 
 export function getPhrases() {
-	return phrases;
+	return phrasesWithContext;
 }
 
 function createImport(name, path) {
@@ -105,6 +151,18 @@ function i18nId(cfg: Config, prop?: string) {
 	return prop ? ts.createPropertyAccess(id, prop) : id;
 }
 
+function i18nWrap(cfg: Config, prop: string, args: ts.Expression[]) {
+	if (phrasesContext.length > 1) {
+		if (args.length === 1) {
+			args.push(ts.createArrayLiteral());
+		}
+
+		args.push(createLiteral(phrasesContext[0]));
+	}
+
+	return ts.createCall(i18nId(cfg, prop), [], args);
+}
+
 function visited<T extends ts.Node>(node: T): T {
 	node['__visited__'] = true;
 	return node;
@@ -128,9 +186,7 @@ function wrapStringLiteral(node: ts.StringLiteralLike, cfg: Config) {
 
 	savePhrase(text.slice(1, -1), node, cfg);
 
-	return ts.createCall(i18nId(cfg), [], [
-		ts.createIdentifier(text),
-	])
+	return i18nWrap(cfg, null, [ts.createIdentifier(text)]);
 }
 
 function wrapTemplateExpression(node: ts.TemplateExpression, context, cfg: Config) {
@@ -148,7 +204,7 @@ function wrapTemplateExpression(node: ts.TemplateExpression, context, cfg: Confi
 
 	savePhrase(phrase, node, cfg);
 
-	return ts.createCall(i18nId(cfg), [], [
+	return i18nWrap(cfg, null, [
 		createLiteral(phrase),
 		ts.createArrayLiteral(args),
 	]);
@@ -265,9 +321,9 @@ function visitNode(node: ts.Node, context, cfg: Config): ts.Node {
 			return ts.updateJsxElement(
 				node,
 				node.openingElement,
-				[ts.createJsxExpression(undefined, ts.createCall(
-					i18nId(cfg),
-					[],
+				[ts.createJsxExpression(undefined, i18nWrap(
+					cfg,
+					null,
 					[].concat(
 						createLiteral(phrase),
 						args.length ? ts.createArrayLiteral(args) : [],
@@ -277,9 +333,9 @@ function visitNode(node: ts.Node, context, cfg: Config): ts.Node {
 			);
 		}
 
-		const callExp = ts.createCall(
-			i18nId(cfg, 'jsx'),
-			[],
+		const callExp = i18nWrap(
+			cfg,
+			'jsx',
 			[
 				createLiteral(phrase),
 				ts.createArrayLiteral([
@@ -299,10 +355,68 @@ function visitNode(node: ts.Node, context, cfg: Config): ts.Node {
 	return node;
 }
 
-function visitNodeAndChildren(node: ts.Node, context, cfg: Config) {
+type InlineConfig = {
+	context: string;
+	isJSXExpr: boolean;
+};
+
+function parseInlineConfig(node: ts.Node): InlineConfig {
+	let expr = '';
+
+	if (ts.isJsxExpression(node) && !node.expression) {
+		try {
+			expr = node.getText();
+		} catch (err) {}
+	}
+
+	if (node.hasOwnProperty('jsDoc') && node['jsDoc'].length) {
+		expr = node['jsDoc'][0].getText();
+	}
+
+	const rule = expr ? expr.match(/@tx-i18n\s+([a-z]+(?:\s*:\s*[\w\d]+)?(?:,\s*)?)+/) : null;
+
+	if (rule) {
+		return rule[0]
+			.split('@tx-i18n')[1]
+			.trim()
+			.split(/\s*,\s*/g).reduce((cfg, token) => {
+				const pair = token.split(/\s*:\s*/);
+				cfg[pair[0]] = pair.length === 2 ? pair[1] : true;
+				return cfg;
+			}, {
+				isJSXExpr: ts.isJsxExpression(node),
+			} as InlineConfig)
+		;
+	}
+}
+
+function visitNodeAndChildren(node: ts.Node, context, cfg: Config, jsxInlineConfig: InlineConfig[] = []) {
 	return ts.visitEachChild(
 		visitNode(node, context, cfg),
-		(childNode) => visitNodeAndChildren(childNode, context, cfg),
+		(childNode) => {
+			let inlineCfg = parseInlineConfig(childNode);
+
+			if (!inlineCfg) {
+				if (ts.isJsxElement(childNode)) {
+					inlineCfg = jsxInlineConfig.pop();
+				}
+			} else if (inlineCfg.isJSXExpr) {
+				jsxInlineConfig.push(inlineCfg);
+				inlineCfg = null;
+			}
+
+			if (inlineCfg) {
+				inlineCfg.context && phrasesContext.unshift(inlineCfg.context);
+			}
+
+			const result = visitNodeAndChildren(childNode, context, cfg);
+
+			if (inlineCfg) {
+				inlineCfg.context && phrasesContext.shift();
+			}
+
+			return result;
+		},
 		context,
 	);
 }
@@ -382,9 +496,14 @@ export type TXConfig = Partial<Pick<Config,
 	| 'isHumanText'
 	| 'isTranslatableJsxAttribute'
 	| 'overrideHumanTextChecker'
+	| 'pharsesStore'
 >>
 
 export default function transformerFactory(config: TXConfig) {
+	if (config.pharsesStore) {
+		phrasesWithContext = config.pharsesStore;
+	}
+
 	return function transformer(context: ts.TransformationContext) {
 		return function visitor(file: ts.SourceFile) {
 			const cfg: Config = {
@@ -400,6 +519,8 @@ export default function transformerFactory(config: TXConfig) {
 				sourceFile: file,
 				...config,
 			};
+
+			phrasesContext = ['default'];
 
 			if (cfg.overrideHumanTextChecker) {
 				cfg.isHumanText = cfg.overrideHumanTextChecker(cfg.isHumanText);

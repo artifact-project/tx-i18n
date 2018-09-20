@@ -21,11 +21,13 @@ it('template', () => {
 	expect(transform('template')).toMatchSnapshot();
 });
 
-it('template', () => {
+it('phrases', () => {
 	resetPhrases();
 	transform('simple')
 
-	expect(getPhrases()[0]).toEqual({
+	expect(Object.keys(getPhrases())).toEqual(['default']);
+	expect(getPhrases().default[0]).toEqual({
+		ctx: 'default',
 		file: `${__dirname}/fixture/simple.ts`,
 		value: 'foo',
 		loc: {
@@ -33,4 +35,29 @@ it('template', () => {
 			end: {line: 0, character: 5},
 		},
 	});
+});
+
+it('phrases with context', () => {
+	resetPhrases();
+	transform('context')
+
+	expect(Object.keys(getPhrases())).toEqual([
+		'default',
+		'other',
+	]);
+
+	expect(getPhrases().default.map(p => p.value)).toEqual([
+		'foo',
+		'bar',
+		'qux',
+	]);
+
+	expect(getPhrases().other[0].ctx).toEqual('other');
+	expect(getPhrases().other.map(p => p.value)).toEqual([
+		'bar',
+		'foo',
+		'bar',
+		'baz',
+		'qux',
+	]);
 });

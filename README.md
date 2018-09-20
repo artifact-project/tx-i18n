@@ -12,7 +12,7 @@ npm i --save-dev tx-i18n
 
 - No additional markup (Just [compare](./COMPARE.md) with react-intl or react-i18next)
 - Fastest (see [benchmarks](./__bench__/))
-- Context (todo)
+- [Context](#context)
 - Pluralization by [CLDR](http://www.unicode.org/cldr/charts/latest/supplemental/language_plural_rules.html#en) (todo)
 - Support
   - Litteral strings
@@ -70,8 +70,53 @@ setLang('en');
 
 ```ts
 export default {
-	'Hi, <#1>!': 'Hi, <#1>!',
-	'Click <1>here</1> for help': 'Click <1>here</1> for help',
+	'default': {
+		'Hi, <#1>!': 'Hi, <#1>!',
+		'Click <1>here</1> for help': 'Click <1>here</1> for help',
+	},
+};
+```
+
+---
+
+<a name="context">
+
+### Context
+
+```tsx
+const dict = {
+	firstName: 'Имя',
+	lastName: 'Фамилия',
+};
+
+/** @tx-i18n context: personal */
+const personalDict = {
+	firstName: 'Имя',
+	lastName: 'Фамилия',
+};
+
+const Form = () => (
+	{/** @tx-i18n context: personal */}
+	<div>
+		<h1>Ваши данные</h1>
+		<form>...</form>
+	</div>
+);
+```
+
+##### `./src/locale/__default__.ts`
+
+```ts
+export default {
+	'default': {
+		'Имя': 'Имя',
+		'Фамилия': 'Фамилия',
+	},
+	'personal': {
+		'Имя': 'Имя',
+		'Фамилия': 'Фамилия',
+		'Ваши данные': 'Ваши данные',
+	},
 };
 ```
 
@@ -124,6 +169,7 @@ Is a magic typescript transformer ;]
 - **packageName**: `string` — the name of the package from which will be exported as default the function with the name `fnName`. (optional, default: `tx-i18n`)
 - **include**: `Array<string|regexp>` — an array of files or paths that need for a transform. (optional)
 - **exclude**: `Array<string|regexp>` — an array of files or paths that need to exclude for a transform. (optional)
+- **pharsesStore**: `ContextedPharses` — a reference to a variable which will be used to collect phrases (optional)
 - **isHummanText**: `(text: string, node: ts.Node) => boolean` — (optional)
 - **isTranslatableJsxAttribute**: `(attr: ts.JsxAttribute, elem: ts.JsxElement) => boolean` — (optional)
 - **overrideHumanTextChecker**: `(isHummanText: HumanTextChecker) => HumanTextChecker` — (optional)
@@ -134,11 +180,40 @@ Is a magic typescript transformer ;]
 
 Is a webpack plugin for save all phrases to translate
 
-- **output**: `string | (phases: Pharse[]) => Array<{file: string; phases: Phrase[];}>` — the filename or function that returns the array for separation `phrases` by files.
+- **output**: `string | (phases: ContextedPhrases) => Array<{file: string; phases: ContextedPhrases}>` — the filename or function that returns the array for separation `phrases` by files.
   - `.json` — save as `json`
   - If you use `.ts` or `.js`, file will be saved as ES Module.
-- **stringify**: `(locale: Locale) => string` — convertor to json before save (optional)
+- **stringify**: `(locale: ContextedLocale) => string` — convertor to json before save (optional)
 - **indent**: `string` — `  ` (optional)
+
+```ts
+type ContextedPhrases = {
+	[context: string]: Pharse[];
+}
+
+type Pharse = {
+	value: string;
+	file: string;
+	loc: {
+		start: {
+			line: number;
+			character: number;
+		};
+		end: {
+			line: number;
+			character: number;
+		};
+	};
+}
+
+type ContextedLocale = {
+	[context: string]: Locale;
+}
+
+type Locale = {
+	[pharse: string]: string;
+}
+```
 
 ---
 

@@ -1,4 +1,4 @@
-import { getTranslate } from '../i18n/locale';
+import { getTranslate, getLang } from '../i18n/locale';
 import { createCompiler } from '../i18n/compiler';
 
 type JsxElement = {
@@ -25,8 +25,8 @@ export function jsxFactory(create: (type: string | Function, props: object, ...c
 	});
 	let Wrapper = null;
 
-	function jsx(phrase: string, parts) {
-		const translatePhrase = getTranslate(phrase);
+	function jsx(phrase: string, parts: any[], ctx: string) {
+		const translatePhrase = getTranslate(phrase, getLang(), ctx);
 		const compiledPhrase = compile(translatePhrase);
 
 		return Wrapper

@@ -4,6 +4,7 @@ import * as renderer from 'react-test-renderer';
 import { transform } from './test-utils';
 import i18n from '../../index';
 import { setDefaultLocale } from '../i18n/locale';
+import { resetPhrases, getPhrases } from './transformer';
 
 beforeEach(() => {
 	setDefaultLocale({});
@@ -75,28 +76,40 @@ describe('render', () => {
 
 		it('react-composite: DeepHello', () => {
 			setDefaultLocale({
-				'Привет <#1>-кун!1': 'Hi, <#1>-kun!',
-				'<1/> или Нет!': '<1/> or No!',
+				default: {
+					'Привет <#1>-кун!1': 'Hi, <#1>-kun!',
+					'<1/> или Нет!': '<1/> or No!',
+				},
 			});
 			expect(render(blocks.DeepHello, {username: 'i18n'})).toMatchSnapshot();
 		});
 
 		it('react-composite: DeepHello (invert)', () => {
 			setDefaultLocale({
-				'Привет <#1>-кун!1': '<#1>, HI!',
-				'<1/> или Нет!': 'No or <1/>!',
+				default: {
+					'Привет <#1>-кун!1': '<#1>, HI!',
+					'<1/> или Нет!': 'No or <1/>!',
+				},
 			});
 			expect(render(blocks.DeepHello, {username: 'i18n'})).toMatchSnapshot();
 		});
 
 		it('react-composite: Dialog', () => {
 			setDefaultLocale({
-				'Подвал': 'Footer',
-				'Хорошо': 'OK',
-				'Отмена': 'Cancel',
-				'Ширина:': 'Width:',
-				'Да<#1><2/>': '<2/> — yes',
+				default: {
+					'Подвал': 'Footer',
+					'Хорошо': 'OK',
+					'Отмена': 'Cancel',
+					'Ширина:': 'Width:',
+					'Да<#1><2/>': '<2/> — fail',
+				},
+				form: {
+					'Отмена': 'Form cancel',
+					'Да<#1><2/>': '<2/> — YES',
+				},
 			});
+
+			expect(Object.keys(getPhrases())).toEqual(['default', 'form']);
 			expect(render(blocks.Dialog)).toMatchSnapshot();
 		});
 	});

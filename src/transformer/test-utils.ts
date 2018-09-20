@@ -6,6 +6,7 @@ const compilerOptions: ts.CompilerOptions = {
     module: ts.ModuleKind.ESNext,
     target: ts.ScriptTarget.ESNext,
     jsx: ts.JsxEmit.Preserve,
+    removeComments: false,
     moduleResolution: ts.ModuleResolutionKind.NodeJs,
 }
 

@@ -2,7 +2,7 @@ import { createElement } from 'react';
 
 import { createCompiler } from './compiler';
 import { jsxFactory } from '../jsx/jsx';
-import { getTranslate } from './locale';
+import { getTranslate, getLang } from './locale';
 
 const compile = createCompiler({
 	inject: null,
@@ -13,8 +13,8 @@ const compile = createCompiler({
 	value: (part) => `${part}+`,
 });
 
-function i18n(phrase: string, parts: any[]) {
-	const translatePhrase = getTranslate(phrase);
+function i18n(phrase: string, parts: any[], ctx: string = 'default') {
+	const translatePhrase = getTranslate(phrase, getLang(), ctx);
 	const compiledPhrase = compile(translatePhrase);
 
 	return compiledPhrase(parts);
