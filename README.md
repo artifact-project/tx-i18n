@@ -10,7 +10,7 @@ npm i --save-dev tx-i18n
 
 ### Feature
 
-- No additional markup (Just [compare](./COMPARE.md) with react-intl or react-i18next)
+- No additional markup (Just [compare](./COMPARE.md) with [react-intl](https://github.com/yahoo/react-intl) or [react-i18next](https://github.com/i18next/react-i18next))
 - Fastest (see [benchmarks](./__bench__/))
 - [Context](#context)
 - Pluralization by [CLDR](http://www.unicode.org/cldr/charts/latest/supplemental/language_plural_rules.html#en) (todo)
