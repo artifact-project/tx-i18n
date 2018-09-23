@@ -13,7 +13,7 @@ npm i --save-dev tx-i18n
 - No additional markup (Just [compare](./COMPARE.md) with [react-intl](https://github.com/yahoo/react-intl) or [react-i18next](https://github.com/i18next/react-i18next))
 - Fastest (see [benchmarks](./__bench__/))
 - [Context](#context)
-- Pluralization by [CLDR](http://www.unicode.org/cldr/charts/latest/supplemental/language_plural_rules.html#en) (todo)
+- [Pluralization](#pluralization) by [CLDR](http://www.unicode.org/cldr/charts/latest/supplemental/language_plural_rules.html#en) (todo)
 - Support
   - Litteral strings
   - Template strings
@@ -79,7 +79,7 @@ export default {
 
 ---
 
-<a name="context">
+<a name="context"></a>
 
 ### Context
 
@@ -118,6 +118,51 @@ export default {
 		'Имя': 'Имя',
 		'Фамилия': 'Фамилия',
 		'Ваши данные': 'Ваши данные',
+	},
+};
+```
+
+---
+
+<a name="pluralization">
+
+### Pluralization
+
+
+```jsx
+import {plural} from 'tx-i18n';
+
+const Hello = ({name, unreadCount}) => (
+	<div>
+		Hello <b>{name}</b>, you have <a href="#unread">{unreadCount} {plural('messages', unreadCount)}</a>.
+	</div>
+);
+```
+
+##### `./src/locale/__plural__.ts`
+
+```ts
+import { PluralDict } from 'tx-i18n';
+
+type AvailablePluralKeys = {
+	default: 'messages';
+}
+
+export default {
+	[C in keyof AvailablePluralKeys]: {
+		[K in keyof AvailablePluralKeys[C]]: PluralDict;
+	};
+};
+```
+
+##### `./src/locale/ru_RU.plural.ts`
+
+```ts
+import AvailablePluralKeys from './__plural__';
+
+export default <AvailablePluralKeys>{
+	default: {
+		messages:
 	},
 };
 ```
