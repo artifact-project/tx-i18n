@@ -130,7 +130,7 @@ export default {
 
 
 ```jsx
-import {plural} from 'tx-i18n';
+import { plural } from 'tx-i18n';
 
 const Hello = ({name, unreadCount}) => (
 	<div>
@@ -142,15 +142,21 @@ const Hello = ({name, unreadCount}) => (
 ##### `./src/locale/__plural__.ts`
 
 ```ts
-import { PluralDict } from 'tx-i18n';
-
-type AvailablePluralKeys = {
-	default: 'messages';
-}
+import { PluralRules, PluralKeys } from 'tx-i18n/plural';
 
 export default {
-	[C in keyof AvailablePluralKeys]: {
-		[K in keyof AvailablePluralKeys[C]]: PluralDict;
+	default: {
+		messages: true,
+	},
+};
+
+export type PluralLocale<PR extends PluralRules, PK extends PluralKeys> = {
+	[CONTEXT in keyof PK]: {
+		[KEY in keyof PK[CONTEXT]]: {
+			[TYPE in keyof PR]: {
+				[CATEGORY in keyof PR[TYPE]]: string;
+			};
+		};
 	};
 };
 ```
@@ -158,13 +164,20 @@ export default {
 ##### `./src/locale/ru_RU.plural.ts`
 
 ```ts
-import AvailablePluralKeys from './__plural__';
+import { setPlural } from 'tx-i18n';
+import ruLules from 'tx-i18n/plural/rules/ru';
+import pluralKeys from './__plural__';
 
-export default <AvailablePluralKeys>{
+setPlural('ru_RU', ruLules, pluralKeys, {
 	default: {
-		messages:
+		messages: {
+			one: 'сообщение',
+			few: 'сообщения',
+			many: 'сообщений',
+			other: 'сообщения',
+		},
 	},
-};
+});
 ```
 
 ---
@@ -274,7 +287,7 @@ Using the [Compiler API](https://github.com/Microsoft/TypeScript/wiki/Using-the-
 // Original
 const text = 'Hello world';
 
-// Transformed
+// Transformed (after bundle build)
 import __ from 'tx-i18n';
 const text = __('Hello world');
 ```
@@ -285,7 +298,7 @@ const text = __('Hello world');
 // Original
 const text = `Hi, ${username}!`;
 
-// Transformed
+// Transformed (after bundle build)
 import __ from 'tx-i18n';
 const text = __('Hi, <#1>!', [username]);
 ```
@@ -303,7 +316,7 @@ const Fragment = () => (
 	</div>
 );
 
-// Transformed
+// Transformed (after bundle build)
 import __ from 'tx-i18n';
 const Fragment = () => (
 	<div title={__('This is fragment')} data-name="frag">
