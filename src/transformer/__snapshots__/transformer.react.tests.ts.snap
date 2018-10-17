@@ -2,7 +2,7 @@
 
 exports[`render react react: ClickHere 1`] = `
 <div>
-  Привет 
+  Привет 
   Рубаха
   , нажми 
   <a
@@ -127,7 +127,7 @@ exports[`transform react 1`] = `
 import * as React from 'react';
 export const Static = () => (<div className={'host'}>{__(\\"Вова, купи \\\\\\"гречу\\\\\\"!\\")}</div>);
 export const Hello = ({ username }) => (__.jsx(\\"Привет <#1>-кун!1\\", [{ type: \\"div\\", props: { className: \`host\` } }, username]));
-export const ClickHere = ({ username }) => (__.jsx(\\"Привет <#1>, нажми <2>здесь</2> чтобы продолжить.\\", [{ type: \\"div\\", props: null }, username, { type: \\"a\\", props: { href: \\"#\\" } }]));
+export const ClickHere = ({ username }) => (__.jsx(\\"Привет&nbsp;<#1>, нажми <2>здесь</2> чтобы продолжить.\\", [{ type: \\"div\\", props: null }, username, { type: \\"a\\", props: { href: \\"#\\" } }]));
 export const Input = ({ hint, mode }) => (<div className={\`input \${mode}\`}>
 		<input placeholder={__(\\"Подсказка: <#1>\\", [hint])}/>
 		<button value={__(\\"Войти\\")}/>

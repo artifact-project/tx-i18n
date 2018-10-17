@@ -17,7 +17,7 @@ export function jsxFactory(create: (type: string | Function, props: object, ...c
 		partOffset: 0,
 		before: () => '__CREATE__(__parts__[0].type, __parts__[0].props,',
 		after: () => ')',
-		text: (text) => `${text},`,
+		text: (text) => `${htmlDecode(text)},`,
 		value: (part) => `${part},`,
 		selfClose: (part) => `__CREATE__(${part}.type, ${part}.props),`,
 		open: (part) => `__CREATE__(${part}.type, ${part}.props,`,
@@ -43,4 +43,24 @@ export function jsxFactory(create: (type: string | Function, props: object, ...c
 		(phrase: string, parts: any[]): JsxElement;
 		useWrapper: (Cmp: Function) => void;
 	};
+}
+
+const decoder = document.createElement('i');
+const entities = {};
+const R_ENTITIES = /&[a-z]+;/g;
+
+function htmlDecode(text: string) {
+	return text.indexOf('&') > -1
+		? text.replace(R_ENTITIES, htmlEntityDecode)
+		: text
+	;
+}
+
+function htmlEntityDecode(entity: string) {
+	if (!entities.hasOwnProperty(entity)) {
+		decoder.innerHTML = entity;
+		entities[entity] = decoder.textContent;
+	}
+
+	return entities[entity]
 }

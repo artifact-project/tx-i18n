@@ -10,7 +10,7 @@ export const Hello = ({username}) => (
 
 export const ClickHere = ({username}) => (
 	<div>
-		Привет {username}, нажми <a href="#">здесь</a> чтобы продолжить.
+		Привет&nbsp;{username}, нажми <a href="#">здесь</a> чтобы продолжить.
 	</div>
 );
 
