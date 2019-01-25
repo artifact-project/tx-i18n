@@ -1,7 +1,7 @@
 import { writeFileSync } from 'fs';
-import { getPhrases, resetPhrases, Pharse, ContextedPhrases } from '../transformer/transformer';
+import { getPhrases, resetPhrases, ContextedPhrases } from '../transformer/transformer';
 import { Compiler } from 'webpack';
-import { Locale, ContextedLocale } from '../i18n/locale';
+import { ContextedLocale } from '../i18n/locale';
 
 export type ExtractorSeparateOutput = (phrases: ContextedPhrases) => Array<{
 	file: string;

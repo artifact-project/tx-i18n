@@ -6,6 +6,11 @@ const obj = {
 	'bar-qux': 'wow',
 	[`interpolated ${123}`]: 'ok',
 };
+const inArray = [
+	{
+		value: 'Username',
+	},
+];
 
 obj['property'] = 'yes';
 obj[`property: ${321}`] = `wow`;

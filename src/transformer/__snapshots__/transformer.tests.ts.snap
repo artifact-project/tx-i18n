@@ -25,6 +25,11 @@ const obj = {
     'bar-qux': __('wow'),
     [\`interpolated \${123}\`]: __('ok'),
 };
+const inArray = [
+    {
+        value: __('Username'),
+    },
+];
 obj['property'] = __('yes');
 obj[\`property: \${321}\`] = __(\`wow\`);
 "
