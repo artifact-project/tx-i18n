@@ -1,7 +1,7 @@
 const R_SEP = /<(\/|#)?(\d+)(\/?)>/g;
 const R_CLEANER = /(?:,)(\n\s*\))/g;
 
-type CompilerConfig = {
+type CompilerSpec = {
 	inject: {
 		[dep:string]: Function;
 	};
@@ -15,7 +15,14 @@ type CompilerConfig = {
 	selfClose?: (part: string, partIdx: number) => string;
 }
 
-export function createCompiler(cfg: CompilerConfig) {
+const EMPTY_STRING = '';
+const HASH_BANG = '#';
+
+const INDENT = '  ';
+const INDENT_INC = 'inc';
+const INDENT_DEC = 'dec';
+
+export function createCompiler(spec: CompilerSpec) {
 	const COMPILED = {};
 
 	return function compile(phrase: string): (parts: any[]) => string {
@@ -25,56 +32,56 @@ export function createCompiler(cfg: CompilerConfig) {
 
 		const source = [];
 		const tokens = phrase.split(R_SEP);
-		let indent = '';
+		let indent = EMPTY_STRING;
 		let compiled = null;
 
-		function write(code: string, ind?: 'inc' | 'dec') {
-			if (ind === 'dec') {
+		function write(code: string, ind?: typeof INDENT_INC | typeof INDENT_DEC) {
+			if (ind === INDENT_DEC) {
 				indent = indent.slice(2);
 			}
 
 			source.push(`${indent}${code}`);
 
-			if (ind === 'inc') {
-				indent += '  ';
+			if (ind === INDENT_INC) {
+				indent += INDENT;
 			}
 		}
 
-		write('');
-		write(cfg.before(), 'inc');
+		write(EMPTY_STRING);
+		write(spec.before(), INDENT_INC);
 
 		for (let i = 0; i < tokens.length; i += 4) {
 			const text = tokens[i];
 			const type = tokens[i + 1];
-			const partIdx = +tokens[i + 2] + cfg.partOffset;
+			const partIdx = +tokens[i + 2] + spec.partOffset;
 			const selfClosed = tokens[i + 3];
 
-			if (text !== '') {
-				write(cfg.text(JSON.stringify(text)));
+			if (text !== EMPTY_STRING) {
+				write(spec.text(JSON.stringify(text)));
 			}
 
-			if (type === '#') {
-				write(cfg.value(`__parts__[${partIdx}]`, partIdx));
+			if (type === HASH_BANG) {
+				write(spec.value(`__parts__[${partIdx}]`, partIdx));
 			} else if (selfClosed) {
-				write(cfg.selfClose(`__parts__[${partIdx}]`, partIdx));
+				write(spec.selfClose(`__parts__[${partIdx}]`, partIdx));
 			} else if (type === '/') {
-				write(cfg.close(`__parts__[${partIdx}]`, partIdx), 'dec');
+				write(spec.close(`__parts__[${partIdx}]`, partIdx), INDENT_DEC);
 			} else if (partIdx) {
-				write(cfg.open(`__parts__[${partIdx}]`, partIdx), 'inc');
+				write(spec.open(`__parts__[${partIdx}]`, partIdx), INDENT_INC);
 			}
 		}
 
-		write(cfg.after(), 'dec');
+		write(spec.after(), INDENT_DEC);
 
-		const code = `${cfg.inject ? `var ${Object
-			.keys(cfg.inject)
+		const code = `${spec.inject ? `var ${Object
+			.keys(spec.inject)
 			.map(name => `${name} = __INJECT__['${name}']`)
 			.join(';\nvar ')
 		};` : ``}
 		return function (__parts__) {return (${source.join('\n').replace(R_CLEANER, '$1')})}`;
 
 		try {
-			compiled = Function(`__INJECT__`, code)(cfg.inject);
+			compiled = Function(`__INJECT__`, code)(spec.inject);
 		} catch (err) {
 			compiled = () => `${phrase}\n---------\n${err.message}\n---------\n${code}`;
 		}
