@@ -1,14 +1,13 @@
-import tx18n from '../../transformer/transformer';
 import { Configuration } from 'webpack';
 
 
-export default <Configuration>{
+export default (module: Configuration['module']): Configuration => ({
 	context: __dirname,
 	entry: './example.tsx',
 
 	output: {
 		path: __dirname,
-		filename: 'output.js',
+		filename: 'example.output.js',
 	},
 
 	resolve: {
@@ -19,25 +18,5 @@ export default <Configuration>{
 		Buffer: false,
 	},
 
-	module: {
-		rules: [{
-			test: /\.tsx?$/,
-			loader: 'awesome-typescript-loader',
-			exclude: /node_modules/,
-			options: {
-				getCustomTransformers: () => ({
-					before: [
-						tx18n({
-							packageName: `${__dirname}/../../i18n/i18n`,
-							exclude: [
-								'tx-i18n/src/i18n',
-								'tx-i18n/src/jsx',
-							],
-						}),
-					],
-					after: [],
-				}),
-			},
-		}],
-	},
-};
+	module,
+});
