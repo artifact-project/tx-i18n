@@ -104,12 +104,12 @@ exports[`render react-composite react-composite: Dialog 1`] = `
         <button
           value="Form cancel"
         />
-        или
+         or 
         <button
           name="save"
           title={undefined}
           type="submit"
-          value="Сохранить"
+          value="Save"
         />
       </p>
     </fieldset>
