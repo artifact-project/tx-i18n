@@ -1,14 +1,21 @@
 import * as React from 'react';
 import { Hello } from './react';
 
+type ButtonProps = {
+	name: string;
+	text: string;
+	hint?: string;
+	primary?: boolean;
+}
+
 export const DeepHello = (props) => {
 	return <div>
 		<Hello {...props}/> или Нет!
 	</div>
 };
 
-export const Button = ({name, text, hint}) => {
-	return <button name={name} value={text} title={hint}/>
+export const Button = ({name, text, hint, primary}: ButtonProps) => {
+	return <button name={name} value={text} title={hint} type={primary ? 'submit' : 'button'}/>
 }
 
 export const Form = (props) => {
@@ -53,14 +60,22 @@ export class Dialog extends React.Component<any> {
 						<div className="row">
 							<div className="col">
 								Да{' '}
-								<input type="checked"/>
+								<input type="checked" checked/>
 							</div>
 						</div>
 						<div>
 							{this.innerRender({...props, value: 'Тест'})}
 							Окей
 						</div>
-						<button value="Отмена" />
+						<p>
+							<button value="Отмена" />
+							или
+							<Button
+								name="save"
+								text="Сохранить"
+								primary
+							/>
+						</p>
 					</fieldset>
 				</Form>
 			</div>

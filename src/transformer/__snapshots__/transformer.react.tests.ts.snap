@@ -91,6 +91,7 @@ exports[`render react-composite react-composite: Dialog 1`] = `
           className="col"
         >
           <input
+            checked={true}
             type="checked"
           />
            — YES
@@ -99,9 +100,18 @@ exports[`render react-composite react-composite: Dialog 1`] = `
       <div>
         Окей
       </div>
-      <button
-        value="Form cancel"
-      />
+      <p>
+        <button
+          value="Form cancel"
+        />
+        или
+        <button
+          name="save"
+          title={undefined}
+          type="submit"
+          value="Сохранить"
+        />
+      </p>
     </fieldset>
     <div>
       <div
@@ -110,6 +120,7 @@ exports[`render react-composite react-composite: Dialog 1`] = `
         <button
           name="submit"
           title="Подсказка: 123!"
+          type="button"
           value="OK"
         />
         <button
@@ -143,8 +154,8 @@ import { Hello } from './react';
 export const DeepHello = (props) => {
     return __.jsx(\\"<1/> или Нет!\\", [{ type: \\"div\\", props: null }, { type: Hello, props: { ...props } }]);
 };
-export const Button = ({ name, text, hint }) => {
-    return <button name={name} value={text} title={hint}/>;
+export const Button = ({ name, text, hint, primary }) => {
+    return <button name={name} value={text} title={hint} type={primary ? __('submit') : __('button')}/>;
 };
 export const Form = (props) => {
     return (<form>
@@ -173,13 +184,13 @@ export class Dialog extends React.Component {
 							<div className=\\"col\\">123px</div>
 						</div>
 						<div className=\\"row\\">
-							{__.jsx(\\"Да<#1><2/>\\", [{ type: \\"div\\", props: { className: \\"col\\" } }, ' ', { type: \\"input\\", props: { type: \\"checked\\" } }], \\"form\\")}
+							{__.jsx(\\"Да<#1><2/>\\", [{ type: \\"div\\", props: { className: \\"col\\" } }, ' ', { type: \\"input\\", props: { type: \\"checked\\", checked: true } }], \\"form\\")}
 						</div>
 						<div>
 							{this.innerRender({ ...props, value: __('Тест', [], \\"form\\") })}
 							Окей
 						</div>
-						<button value={__(\\"Отмена\\", [], \\"form\\")}/>
+						{__.jsx(\\"<1/>или<2/>\\", [{ type: \\"p\\", props: null }, { type: \\"button\\", props: { value: __(\\"Отмена\\", [], \\"form\\") } }, { type: Button, props: { name: (), text: (), primary: true } }], \\"form\\")}
 					</fieldset>
 				</Form>
 			</div>);

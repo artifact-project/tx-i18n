@@ -19,15 +19,31 @@ interface Config {
 	sourceFile: ts.SourceFile;
 }
 
-function log(obj) {
+function log(obj: object, ind = '', max = 3) {
 	if (obj == null || /number|string|boolean/.test(typeof obj)) {
 		console.log(obj);
 		return;
 	}
 
 	const copy = {...obj};
-	delete copy.parent;
-	console.log(copy);
+	let lines = [];
+	delete copy['parent'];
+
+	for (let key in copy) {
+		lines.push(
+			`${ind}${key}: ` + (
+			copy[key] === null ? 'null' :
+				typeof copy[key] === 'object'
+					? max > 0 ? '\n' + log(copy[key], ind + '  ', max - 1) : '{ ... }'
+					: copy[key]
+		));
+	}
+
+	if (ind === '') {
+		console.log(lines.join('\n'));
+	}
+
+	return lines.join('\n');
 }
 
 export type Pharse = {
@@ -174,7 +190,13 @@ function createLiteral(val: string) {
 }
 
 function hasJsxTextChildren(node: ts.JsxElement, cfg: Config) {
-	return node.children.some(child => ts.isJsxText(child) && cfg.isHumanText(child.getText(), child));
+	return node.children.some(child => {
+		if (ts.isJsxText(child)) {
+			return cfg.isHumanText(child.getText(), child)
+		} else {
+			return false;
+		}
+	});
 }
 
 function wrapStringLiteral(node: ts.StringLiteralLike, cfg: Config) {
@@ -438,7 +460,7 @@ function jsxTagToObject(node: ts.JsxElement | ts.JsxSelfClosingElement, context,
 		if (ts.isJsxAttribute(prop)) {
 			const {initializer} = prop;
 			let name = prop.name.getText();
-			let value: ts.Expression = null;
+			let value: ts.Expression;
 
 			if (initializer) {
 				if (cfg.isTranslatableJsxAttribute(prop, element) && cfg.isHumanText(prop.getText(), node)) {
@@ -454,11 +476,13 @@ function jsxTagToObject(node: ts.JsxElement | ts.JsxSelfClosingElement, context,
 				} else {
 					value = ts.isJsxExpression(initializer) ? initializer.expression : initializer;
 				}
+			} else {
+				value = ts.createIdentifier('true');
 			}
 
 			props.push(ts.createPropertyAssignment(
 				stringifyObjectKey(name),
-				value ? value : ts.createNull(),
+				value,
 			));
 		} else if (ts.isJsxSpreadAttribute(prop)) {
 			// log();
@@ -514,7 +538,12 @@ export default function transformerFactory(config: TXConfig) {
 				include: null,
 				imports: {},
 				compilerOptions: context.getCompilerOptions(),
-				isHumanText: (value: string) => /[\wа-яё]/.test(value.trim().replace(/\d+([^\s]+)?/g, '').trim()),
+				isHumanText: (value: string) => /[\wа-яё]/i.test(
+					value.trim()
+						.replace(/<\d+\/?>/g, '')
+						.replace(/\d+([^\s]+)?/g, '')
+						.trim()
+				),
 				isTranslatableJsxAttribute: (attr: ts.JsxAttribute) => /^(title|alt|placeholder|value)$/.test(attr.name.getText()),
 				sourceFile: file,
 				...config,
