@@ -17,7 +17,7 @@ npm i --save-dev tx-i18n
 - Support
   - Litteral strings
   - Template strings
-  - TSX/React: Text, Expression, Attributes, Tags (any complexity)
+  - TSX/React: Text, Expression, Attributes, Fragment & Tags (any complexity)
   - **Not supproted**
     - Object keys
 
@@ -230,6 +230,7 @@ Is a magic typescript transformer ;]
 - **include**: `Array<string|regexp>` — an array of files or paths that need for a transform. (optional)
 - **exclude**: `Array<string|regexp>` — an array of files or paths that need to exclude for a transform. (optional)
 - **pharsesStore**: `ContextedPharses` — a reference to a variable which will be used to collect phrases (optional)
+- **normalizeText**: `(text: string) => string` — (optional)
 - **isHummanText**: `(text: string, node: ts.Node) => boolean` — (optional)
 - **isTranslatableJsxAttribute**: `(attr: ts.JsxAttribute, elem: ts.JsxElement) => boolean` — (optional)
 - **overrideHumanTextChecker**: `(isHummanText: HumanTextChecker) => HumanTextChecker` — (optional)
