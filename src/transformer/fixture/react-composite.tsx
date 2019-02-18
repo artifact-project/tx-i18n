@@ -39,7 +39,11 @@ export class Dialog extends React.Component<any> {
 
 		return (
 			<div className="host">
-				<h1>Alert</h1>
+				<h1>
+					Заголовок <i/> да её и
+					мультилайн, да-да.
+				</h1>
+
 				<Form controls={
 					<div title="Подвал">
 						<Button
@@ -50,7 +54,10 @@ export class Dialog extends React.Component<any> {
 						<button value="Отмена" data-id={`рав-текст`}/>
 					</div>
 				}>
-					<h2>Бла-бла-бла</h2>
+					<h2>{`
+						Ох, а вот ещё один
+						мультилайн заголовок.
+					`}</h2>
 					{/** @tx-i18n context: form */}
 					<fieldset>
 						<div className="row">

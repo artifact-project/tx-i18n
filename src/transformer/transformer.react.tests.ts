@@ -4,7 +4,7 @@ import * as renderer from 'react-test-renderer';
 import { transform } from './test-utils';
 import i18n from '../../index';
 import { setDefaultLocale } from '../i18n/locale';
-import { resetPhrases, getPhrases } from './transformer';
+import { getPhrases } from './transformer';
 
 beforeEach(() => {
 	setDefaultLocale({});
@@ -68,6 +68,10 @@ describe('render', () => {
 
 		it('react: ClickHere', () => {
 			expect(render(blocks.ClickHere, {username: 'Рубаха'})).toMatchSnapshot();
+		});
+
+		it('react: Fragment', () => {
+			expect(render(blocks.Fragment)).toMatchSnapshot();
 		});
 	});
 

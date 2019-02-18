@@ -16,6 +16,7 @@ export const ClickHere = ({username}) => (
 
 export const Input = ({hint, mode}) => (
 	<div className={`input ${mode}`}>
+		{/* note: Bla-bla-bla */}
 		<input placeholder={`Подсказка: ${hint}`}/>
 		<button value="Войти"/>
 	</div>
@@ -23,8 +24,15 @@ export const Input = ({hint, mode}) => (
 
 export const InputWithText = ({hint, mode}) => (
 	<div className={`input ${mode}`}>
-		Представьтесь:
+		Представьтесь: {/* note: hmmm */}
 		<input placeholder={`Подсказка: ${hint}`}/>
 		<button value="Войти"/>
+	</div>
+);
+
+export const Fragment = () => (
+	<div>
+		<>Простой текст</>
+		<>Фрагмент и <i/></>
 	</div>
 );

@@ -14,6 +14,14 @@ exports[`render react react: ClickHere 1`] = `
 </div>
 `;
 
+exports[`render react react: Fragment 1`] = `
+<div>
+  Простой текст
+  Фрагмент и 
+  <i />
+</div>
+`;
+
 exports[`render react react: Hello 1`] = `
 <div
   className="host"
@@ -63,11 +71,13 @@ exports[`render react-composite react-composite: Dialog 1`] = `
   className="host"
 >
   <h1>
-    Alert
+    Заголовок 
+    <i />
+     да её имультилайн, да-да.
   </h1>
   <form>
     <h2>
-      Бла-бла-бла
+       Ох, а вот ещё один мультилайн заголовок. 
     </h2>
     <fieldset>
       <div
@@ -140,10 +150,15 @@ export const Static = () => (<div className={'host'}>{__(\\"Вова, купи \
 export const Hello = ({ username }) => (__.jsx(\\"Привет <#1>-кун!1\\", [{ type: \\"div\\", props: { className: \`host\` } }, username]));
 export const ClickHere = ({ username }) => (__.jsx(\\"Привет&nbsp;<#1>, нажми <2>здесь</2> чтобы продолжить.\\", [{ type: \\"div\\", props: null }, username, { type: \\"a\\", props: { href: \\"#\\" } }]));
 export const Input = ({ hint, mode }) => (<div className={\`input \${mode}\`}>
+		
 		<input placeholder={__(\\"Подсказка: <#1>\\", [hint])}/>
 		<button value={__(\\"Войти\\")}/>
 	</div>);
-export const InputWithText = ({ hint, mode }) => (__.jsx(\\"Представьтесь:<1/><2/>\\", [{ type: \\"div\\", props: { className: \`input \${mode}\` } }, { type: \\"input\\", props: { placeholder: __(\\"Подсказка: <#1>\\", [hint]) } }, { type: \\"button\\", props: { value: __(\\"Войти\\") } }]));
+export const InputWithText = ({ hint, mode }) => (__.jsx(\\"Представьтесь: <1/><2/>\\", [{ type: \\"div\\", props: { className: \`input \${mode}\` } }, { type: \\"input\\", props: { placeholder: __(\\"Подсказка: <#1>\\", [hint]) } }, { type: \\"button\\", props: { value: __(\\"Войти\\") } }]));
+export const Fragment = () => (<div>
+		<>{__(\\"Простой текст\\")}</>
+		{__.jsx(\\"Фрагмент и <1/>\\", [{ type: React.Fragment }, { type: \\"i\\", props: null }])}
+	</div>);
 "
 `;
 
@@ -171,12 +186,13 @@ export class Dialog extends React.Component {
     render() {
         const { props } = this;
         return (<div className=\\"host\\">
-				<h1>{__(\\"Alert\\")}</h1>
+				{__.jsx(\\"Заголовок <1/> да её имультилайн, да-да.\\", [{ type: \\"h1\\", props: null }, { type: \\"i\\", props: null }])}
+
 				<Form controls={<div title={__(\\"Подвал\\")}>
 						<Button name={__(\\"submit\\")} text={__(\\"Хорошо\\")} hint={__(\\"Подсказка: <#1>!\\", [123])}/>
 						<button value={__(\\"Отмена\\")} data-id={\`рав-текст\`}/>
 					</div>}>
-					<h2>{__(\\"Бла-бла-бла\\")}</h2>
+					<h2>{__(\` Ох, а вот ещё один мультилайн заголовок. \`)}</h2>
 					
 					<fieldset>
 						<div className=\\"row\\">

@@ -4,6 +4,7 @@ type HumanTextChecker = (text: string, node: ts.Node) => boolean;
 
 interface Config {
 	isHumanText: HumanTextChecker;
+	normalizeText: (value: string) => string;
 	isTranslatableJsxAttribute: (attr: ts.JsxAttribute, element: ts.JsxOpeningLikeElement) => boolean;
 	overrideHumanTextChecker?: (isHumanText: HumanTextChecker) => HumanTextChecker;
 	fnName: string;
@@ -96,8 +97,13 @@ export function contextedPhrasesFilter(
 	return filteredPhrases;
 }
 
-let phrasesContext: string[];;
+let phrasesContext: string[];
 let phrasesWithContext: ContextedPhrases = {};
+let useNormalizeText: boolean = true; // @todo: пока не работает
+
+function normalizeText({normalizeText}: Config, value: string): string {
+	return useNormalizeText ? normalizeText(value) : value;
+}
 
 function savePhrase(value: string, node: ts.Node, {sourceFile}: Config) {
 	const context = phrasesContext[0];
@@ -189,7 +195,7 @@ function createLiteral(val: string) {
 	return visited(node);
 }
 
-function hasJsxTextChildren(node: ts.JsxElement, cfg: Config) {
+function hasJsxTextChildren(node: ts.JsxElement | ts.JsxFragment, cfg: Config) {
 	return node.children.some(child => {
 		if (ts.isJsxText(child)) {
 			return cfg.isHumanText(child.getText(), child)
@@ -200,7 +206,7 @@ function hasJsxTextChildren(node: ts.JsxElement, cfg: Config) {
 }
 
 function wrapStringLiteral(node: ts.StringLiteralLike, cfg: Config) {
-	const text = node.getText();
+	const text = normalizeText(cfg, node.getText());
 
 	if (!cfg.isHumanText(text, node)) {
 		return visited(node);
@@ -224,6 +230,7 @@ function wrapTemplateExpression(node: ts.TemplateExpression, context, cfg: Confi
 		return visited(node);
 	}
 
+	phrase = normalizeText(cfg, phrase);
 	savePhrase(phrase, node, cfg);
 
 	return i18nWrap(cfg, null, [
@@ -298,7 +305,7 @@ function visitNode(node: ts.Node, context, cfg: Config): ts.Node {
 		}
 
 		return wrapTemplateExpression(node, context, cfg);
-	} else if (ts.isJsxElement(node) && hasJsxTextChildren(node, cfg)) {
+	} else if ((ts.isJsxElement(node) || ts.isJsxFragment(node)) && hasJsxTextChildren(node, cfg)) {
 		const args = [];
 		let simple = true;
 		let gpart = 0;
@@ -318,9 +325,11 @@ function visitNode(node: ts.Node, context, cfg: Config): ts.Node {
 				hasText = true;
 				phrase += child.getFullText().replace(/[\n\t]/g, '');
 			} else if (ts.isJsxExpression(child)) {
-				simple = false;
-				phrase += `<#${++gpart}>`;
-				args.push(visitNode(child.expression, context, cfg));
+				if (child.expression) {
+					simple = false;
+					phrase += `<#${++gpart}>`;
+					args.push(visitNode(child.expression, context, cfg));
+				}
 			} else if (ts.isJsxSelfClosingElement(child)) {
 				simple = false;
 				phrase += `<${++gpart}/>`;
@@ -331,7 +340,7 @@ function visitNode(node: ts.Node, context, cfg: Config): ts.Node {
 			}
 		}, args);
 
-		phrase = phrase.trim();
+		phrase = normalizeText(cfg, phrase.trim());
 
 		if (!hasText || !isHumanText(phrase, node)) {
 			return node;
@@ -340,19 +349,35 @@ function visitNode(node: ts.Node, context, cfg: Config): ts.Node {
 		savePhrase(phrase, node, cfg);
 
 		if (simple) {
-			return ts.updateJsxElement(
-				node,
-				node.openingElement,
-				[ts.createJsxExpression(undefined, i18nWrap(
-					cfg,
-					null,
-					[].concat(
-						createLiteral(phrase),
-						args.length ? ts.createArrayLiteral(args) : [],
-					),
-				))],
-				node.closingElement,
-			);
+			if (ts.isJsxFragment(node)) {
+				return ts.updateJsxFragment(
+					node,
+					node.openingFragment,
+					[ts.createJsxExpression(undefined, i18nWrap(
+						cfg,
+						null,
+						[].concat(
+							createLiteral(phrase),
+							args.length ? ts.createArrayLiteral(args) : [],
+						),
+					))],
+					node.closingFragment,
+				);
+			} else {
+				return ts.updateJsxElement(
+					node,
+					node.openingElement,
+					[ts.createJsxExpression(undefined, i18nWrap(
+						cfg,
+						null,
+						[].concat(
+							createLiteral(phrase),
+							args.length ? ts.createArrayLiteral(args) : [],
+						),
+					))],
+					node.closingElement,
+				);
+			}
 		}
 
 		const callExp = i18nWrap(
@@ -361,7 +386,10 @@ function visitNode(node: ts.Node, context, cfg: Config): ts.Node {
 			[
 				createLiteral(phrase),
 				ts.createArrayLiteral([
-					jsxTagToObject(node, context, cfg),
+					(ts.isJsxFragment(node)
+						? ts.createIdentifier('{ type: React.Fragment }')
+						: jsxTagToObject(node, context, cfg)
+					),
 					...args,
 				]),
 			],
@@ -379,6 +407,7 @@ function visitNode(node: ts.Node, context, cfg: Config): ts.Node {
 
 type InlineConfig = {
 	context: string;
+	normalize: string;
 	isJSXExpr: boolean;
 };
 
@@ -402,8 +431,8 @@ function parseInlineConfig(node: ts.Node): InlineConfig {
 			.split('@tx-i18n')[1]
 			.trim()
 			.split(/\s*,\s*/g).reduce((cfg, token) => {
-				const pair = token.split(/\s*:\s*/);
-				cfg[pair[0]] = pair.length === 2 ? pair[1] : true;
+				let [key, val] = token.split(/\s*:\s*/);
+				cfg[key] = val == null ? 'true' : val;
 				return cfg;
 			}, {
 				isJSXExpr: ts.isJsxExpression(node),
@@ -428,7 +457,10 @@ function visitNodeAndChildren(node: ts.Node, context, cfg: Config, jsxInlineConf
 			}
 
 			if (inlineCfg) {
+				useNormalizeText = inlineCfg.normalize !== 'false';
 				inlineCfg.context && phrasesContext.unshift(inlineCfg.context);
+			} else {
+				useNormalizeText = true;
 			}
 
 			const result = visitNodeAndChildren(childNode, context, cfg);
@@ -449,7 +481,11 @@ function isTagName(name: string) {
 	return R_IS_TAG.test(name);
 }
 
-function jsxTagToObject(node: ts.JsxElement | ts.JsxSelfClosingElement, context, cfg: Config) {
+function jsxTagToObject(
+	node: ts.JsxElement | ts.JsxSelfClosingElement,
+	context: object,
+	cfg: Config,
+) {
 	const element = ts.isJsxElement(node) ? node.openingElement : node;
 	const {attributes} = element;
 
@@ -520,6 +556,7 @@ export type TXConfig = Partial<Pick<Config,
 	| 'isHumanText'
 	| 'isTranslatableJsxAttribute'
 	| 'overrideHumanTextChecker'
+	| 'normalizeText'
 	| 'pharsesStore'
 >>
 
@@ -538,6 +575,7 @@ export default function transformerFactory(config: TXConfig) {
 				include: null,
 				imports: {},
 				compilerOptions: context.getCompilerOptions(),
+				normalizeText: (value: string) => value.replace(/\s+/g, ' '),
 				isHumanText: (value: string) => /[\wа-яё]/i.test(
 					value.trim()
 						.replace(/<\d+\/?>/g, '')

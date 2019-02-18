@@ -9,7 +9,9 @@ type JsxElement = {
 	};
 }
 
-export function jsxFactory(create: (type: string | Function, props: object, ...children: any[]) => JsxElement) {
+export function jsxFactory(
+	create: (type: string | Function, props: object, ...children: any[]) => JsxElement,
+) {
 	const compile = createCompiler({
 		inject: {
 			__CREATE__: create,
