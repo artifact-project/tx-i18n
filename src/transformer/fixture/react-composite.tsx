@@ -36,6 +36,7 @@ export class Dialog extends React.Component<any> {
 
 	render() {
 		const {props} = this;
+		const text = "Тест \"фу\" бар";
 
 		return (
 			<div className="host">
@@ -43,6 +44,7 @@ export class Dialog extends React.Component<any> {
 					Заголовок <i/> да её и
 					мультилайн, да-да.
 				</h1>
+				<h3>{text}</h3>
 
 				<Form controls={
 					<div title="Подвал">

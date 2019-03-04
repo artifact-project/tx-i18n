@@ -20,6 +20,9 @@ interface Config {
 	sourceFile: ts.SourceFile;
 }
 
+const R_IS_TAG = /^[a-z0-9:]+$/;
+const R_ENTITIES = /&[a-z]{2,}/;
+
 function log(obj: object, ind = '', max = 3) {
 	if (obj == null || /number|string|boolean/.test(typeof obj)) {
 		console.log(obj);
@@ -348,7 +351,7 @@ function visitNode(node: ts.Node, context, cfg: Config): ts.Node {
 
 		savePhrase(phrase, node, cfg);
 
-		if (simple) {
+		if (simple && !R_ENTITIES.test(phrase)) {
 			if (ts.isJsxFragment(node)) {
 				return ts.updateJsxFragment(
 					node,
@@ -474,8 +477,6 @@ function visitNodeAndChildren(node: ts.Node, context, cfg: Config, jsxInlineConf
 		context,
 	);
 }
-
-const R_IS_TAG = /^[a-z0-9:]+$/;
 
 function isTagName(name: string) {
 	return R_IS_TAG.test(name);

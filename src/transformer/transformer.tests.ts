@@ -1,6 +1,10 @@
 import { transform } from './test-utils';
 import { getPhrases, resetPhrases } from './transformer';
 
+beforeEach(() => {
+	resetPhrases();
+})
+
 it('empty', () => {
 	expect(transform('empty')).toMatchSnapshot(`'';`);
 });
@@ -21,8 +25,14 @@ it('template', () => {
 	expect(transform('template')).toMatchSnapshot();
 });
 
+it('func', () => {
+	expect(transform('func')).toMatchSnapshot();
+	// expect(getPhrases().default[0].value).toEqual('Single "quote"')
+	// expect(getPhrases().default[1].value).toEqual('Double \"quote\"');
+	// expect(getPhrases().default[2].value).toEqual('Mixed \"quote\"');
+});
+
 it('phrases', () => {
-	resetPhrases();
 	transform('simple')
 
 	expect(Object.keys(getPhrases())).toEqual(['default']);

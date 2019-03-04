@@ -36,7 +36,7 @@ exports[`render react react: Static 1`] = `
 <div
   className="host"
 >
-  Вова, купи "гречу"!
+  Вова, купи "гречу"!
 </div>
 `;
 
@@ -75,6 +75,9 @@ exports[`render react-composite react-composite: Dialog 1`] = `
     <i />
      да её имультилайн, да-да.
   </h1>
+  <h3>
+    Test "foo" bar
+  </h3>
   <form>
     <h2>
        Ох, а вот ещё один мультилайн заголовок. 
@@ -146,7 +149,7 @@ exports[`render react-composite react-composite: Dialog 1`] = `
 exports[`transform react 1`] = `
 "import __ from \\"tx-i18n\\";
 import * as React from 'react';
-export const Static = () => (<div className={'host'}>{__(\\"Вова, купи \\\\\\"гречу\\\\\\"!\\")}</div>);
+export const Static = () => (__.jsx(\\"Вова, купи&nbsp;\\\\\\"гречу\\\\\\"!\\", [{ type: \\"div\\", props: { className: 'host' } }]));
 export const Hello = ({ username }) => (__.jsx(\\"Привет <#1>-кун!1\\", [{ type: \\"div\\", props: { className: \`host\` } }, username]));
 export const ClickHere = ({ username }) => (__.jsx(\\"Привет&nbsp;<#1>, нажми <2>здесь</2> чтобы продолжить.\\", [{ type: \\"div\\", props: null }, username, { type: \\"a\\", props: { href: \\"#\\" } }]));
 export const Input = ({ hint, mode }) => (<div className={\`input \${mode}\`}>
@@ -185,8 +188,10 @@ export class Dialog extends React.Component {
     }
     render() {
         const { props } = this;
+        const text = __(\\"Тест \\\\\\"фу\\\\\\" бар\\");
         return (<div className=\\"host\\">
 				{__.jsx(\\"Заголовок <1/> да её имультилайн, да-да.\\", [{ type: \\"h1\\", props: null }, { type: \\"i\\", props: null }])}
+				<h3>{text}</h3>
 
 				<Form controls={<div title={__(\\"Подвал\\")}>
 						<Button name={__(\\"submit\\")} text={__(\\"Хорошо\\")} hint={__(\\"Подсказка: <#1>!\\", [123])}/>

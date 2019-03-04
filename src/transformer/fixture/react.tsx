@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 export const Static = () => (
-	<div className={'host'}>Вова, купи "гречу"!</div>
+	<div className={'host'}>Вова, купи&nbsp;"гречу"!</div>
 );
 
 export const Hello = ({username}) => (
