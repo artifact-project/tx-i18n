@@ -4,6 +4,27 @@ export const Static = () => (
 	<div className={'host'}>Вова, купи&nbsp;"гречу"!</div>
 );
 
+export const Entities = () => (
+	<div className={'host'}>
+		<p title="Foo bar">
+			<h2>Left &mdash; Right</h2>
+		</p>
+		<div>
+			<Input
+				hint="Space &mdash; bar"
+				mode="text"
+			/>
+		</div>
+		<div>
+			Enter:
+			<Input
+				hint="User&#8209;name"
+				mode="text"
+			/>
+		</div>
+	</div>
+);
+
 export const Hello = ({username}) => (
 	<div className={`host`}>Привет {username}-кун!1</div>
 );

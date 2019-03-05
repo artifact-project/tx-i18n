@@ -14,6 +14,45 @@ exports[`render react react: ClickHere 1`] = `
 </div>
 `;
 
+exports[`render react react: Entities 1`] = `
+<div
+  className="host"
+>
+  <p
+    title="Foo bar"
+  >
+    <h2>
+      Left — Right
+    </h2>
+  </p>
+  <div>
+    <div
+      className="input text"
+    >
+      <input
+        placeholder="Подсказка: Space — bar"
+      />
+      <button
+        value="Войти"
+      />
+    </div>
+  </div>
+  <div>
+    Enter:
+    <div
+      className="input text"
+    >
+      <input
+        placeholder="Подсказка: User‑name"
+      />
+      <button
+        value="Войти"
+      />
+    </div>
+  </div>
+</div>
+`;
+
 exports[`render react react: Fragment 1`] = `
 <div>
   Простой текст
@@ -150,6 +189,15 @@ exports[`transform react 1`] = `
 "import __ from \\"tx-i18n\\";
 import * as React from 'react';
 export const Static = () => (__.jsx(\\"Вова, купи&nbsp;\\\\\\"гречу\\\\\\"!\\", [{ type: \\"div\\", props: { className: 'host' } }]));
+export const Entities = () => (<div className={'host'}>
+		<p title={__(\\"Foo bar\\")}>
+			{__.jsx(\\"Left &mdash; Right\\", [{ type: \\"h2\\", props: null }])}
+		</p>
+		<div>
+			<Input hint={__(\\"Space — bar\\")} mode={__(\\"text\\")}/>
+		</div>
+		{__.jsx(\\"Enter:<1/>\\", [{ type: \\"div\\", props: null }, { type: Input, props: { hint: (), mode: () } }])}
+	</div>);
 export const Hello = ({ username }) => (__.jsx(\\"Привет <#1>-кун!1\\", [{ type: \\"div\\", props: { className: \`host\` } }, username]));
 export const ClickHere = ({ username }) => (__.jsx(\\"Привет&nbsp;<#1>, нажми <2>здесь</2> чтобы продолжить.\\", [{ type: \\"div\\", props: null }, username, { type: \\"a\\", props: { href: \\"#\\" } }]));
 export const Input = ({ hint, mode }) => (<div className={\`input \${mode}\`}>

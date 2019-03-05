@@ -52,7 +52,8 @@ describe('render', () => {
 	function render(Block, props = {}) {
 		return renderer
 			.create(React.createElement(Block, props))
-			.toJSON();
+			.toJSON()
+		;
 	}
 
 	describe('react', () => {
@@ -60,6 +61,10 @@ describe('render', () => {
 
 		it('react: Static', () => {
 			expect(render(blocks.Static)).toMatchSnapshot();
+		});
+
+		it('react: Entities', () => {
+			expect(render(blocks.Entities)).toMatchSnapshot();
 		});
 
 		it('react: Hello', () => {

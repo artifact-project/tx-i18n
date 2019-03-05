@@ -1,4 +1,5 @@
 import * as ts from 'typescript';
+import { R_ENTITIES, decodeEntities } from './entities';
 
 type HumanTextChecker = (text: string, node: ts.Node) => boolean;
 
@@ -21,7 +22,6 @@ interface Config {
 }
 
 const R_IS_TAG = /^[a-z0-9:]+$/;
-const R_ENTITIES = /&[a-z]{2,}/;
 
 function log(obj: object, ind = '', max = 3) {
 	if (obj == null || /number|string|boolean/.test(typeof obj)) {
@@ -208,14 +208,18 @@ function hasJsxTextChildren(node: ts.JsxElement | ts.JsxFragment, cfg: Config) {
 	});
 }
 
-function wrapStringLiteral(node: ts.StringLiteralLike, cfg: Config) {
-	const text = normalizeText(cfg, node.getText());
+function wrapStringLiteral(node: ts.StringLiteralLike, cfg: Config, decode?: boolean) {
+	let text = normalizeText(cfg, node.getText());
 
 	if (!cfg.isHumanText(text, node)) {
 		return visited(node);
 	}
 
 	savePhrase(text.slice(1, -1), node, cfg);
+
+	if (decode) {
+		text = decodeEntities(text);
+	}
 
 	return i18nWrap(cfg, null, [ts.createIdentifier(text)]);
 }
@@ -275,12 +279,13 @@ function visitNode(node: ts.Node, context, cfg: Config): ts.Node {
 				: parent.parent && ts.isJsxAttribute(parent.parent) && parent.parent
 			;
 
+			// JSX Attribute
 			if (attr) {
 				if (
 					!isTagName(attr.parent.parent.tagName.getText())
 					|| cfg.isTranslatableJsxAttribute(attr, attr.parent.parent)
 				) {
-					const newNode = wrapStringLiteral(node, cfg);
+					const newNode = wrapStringLiteral(node, cfg, true);
 					return newNode === node ? node : ts.createJsxExpression(undefined, newNode);
 				}
 				return node;
