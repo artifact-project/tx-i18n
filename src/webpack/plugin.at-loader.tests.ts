@@ -56,6 +56,7 @@ it('at-loader: Extract', async () => {
 
 				expect(JSON.parse(content)).toEqual({
 					default: {
+						"test test или<#1><2>Duo</2>.": "test test или<#1><2>Duo</2>.",
 						'Демо': 'Демо',
 						'Мы рады видеть тебя!': 'Мы рады видеть тебя!',
 						'Привет, <1><#2></1>!': 'Привет, <1><#2></1>!',
