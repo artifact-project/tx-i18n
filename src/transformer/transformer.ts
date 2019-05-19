@@ -331,7 +331,7 @@ function visitNode(node: ts.Node, context, cfg: Config): ts.Node {
 				phrase += `</${part}>`;
 			} else if (ts.isJsxText(child)) {
 				hasText = true;
-				phrase += child.getFullText().replace(/[\n\t]/g, '');
+				phrase += child.getFullText();
 			} else if (ts.isJsxExpression(child)) {
 				if (child.expression) {
 					simple = false;
@@ -555,7 +555,7 @@ function stringifyObjectKey(name: string) {
 }
 
 export type TXConfig = Partial<Pick<Config,
-	'fnName'
+	| 'fnName'
 	| 'packageName'
 	| 'include'
 	| 'exclude'
@@ -565,6 +565,11 @@ export type TXConfig = Partial<Pick<Config,
 	| 'normalizeText'
 	| 'pharsesStore'
 >>
+
+const R_NORM_TEXT = /(>?)[\r\n]+[ \t]*(<?)/g;
+const NORM_TEXT_FN = (token: string, gt: string, lt: string, idx: number, input: string) => {
+    return gt + ((lt || gt) || (idx + token.length == input.length) || idx == 0 ? '' : ' ') + lt;
+};
 
 export default function transformerFactory(config: TXConfig) {
 	if (config.pharsesStore) {
@@ -581,7 +586,7 @@ export default function transformerFactory(config: TXConfig) {
 				include: null,
 				imports: {},
 				compilerOptions: context.getCompilerOptions(),
-				normalizeText: (value: string) => value.replace(/\s+/g, ' '),
+				normalizeText: (value: string) => value.replace(R_NORM_TEXT, NORM_TEXT_FN),
 				isHumanText: (value: string) => /[\wа-яё]/i.test(
 					value.trim()
 						.replace(/<\d+\/?>/g, '')
@@ -619,7 +624,7 @@ export default function transformerFactory(config: TXConfig) {
 					);
 				} catch (err) {
 					console.error(`\x1b[31m\n[tx-i18n] [update] ${cfg.fileName}\n---\n${err.toString()}\n\x1b[0m`);
-				return file;
+					return file;
 				}
 			} catch (err) {
 				console.error(`\x1b[31m\n[tx-i18n] [visit] ${cfg.fileName}\n---\n${err.toString()}\n\x1b[0m`);

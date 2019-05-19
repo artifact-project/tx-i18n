@@ -112,7 +112,7 @@ exports[`render react-composite react-composite: Dialog 1`] = `
   <h1>
     Заголовок 
     <i />
-     да её имультилайн, да-да.
+     да её и мультилайн, да-да.
   </h1>
   <h3>
     Test "foo" bar
@@ -238,7 +238,7 @@ export class Dialog extends React.Component {
         const { props } = this;
         const text = __(\\"Тест \\\\\\"фу\\\\\\" бар\\");
         return (<div className=\\"host\\">
-				{__.jsx(\\"Заголовок <1/> да её имультилайн, да-да.\\", [{ type: \\"h1\\", props: null }, { type: \\"i\\", props: null }])}
+				{__.jsx(\\"Заголовок <1/> да её и мультилайн, да-да.\\", [{ type: \\"h1\\", props: null }, { type: \\"i\\", props: null }])}
 				<h3>{text}</h3>
 
 				<Form controls={<div title={__(\\"Подвал\\")}>
