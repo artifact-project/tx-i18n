@@ -48,6 +48,7 @@ exports[`render react react: Entities 1`] = `
       <button
         value="Войти"
       />
+      JSX-Фрагмент
     </div>
   </div>
 </div>
@@ -196,14 +197,15 @@ export const Entities = () => (<div className={'host'}>
 		<div>
 			<Input hint={__(\\"Space — bar\\")} mode={__(\\"text\\")}/>
 		</div>
-		{__.jsx(\\"Enter:<1/>\\", [{ type: \\"div\\", props: null }, { type: Input, props: { hint: (), mode: () } }])}
+		{__.jsx(\\"Enter:<1/>\\", [{ type: \\"div\\", props: null }, { type: Input, props: { hint: (), mode: (), descr: <>{__(\\"JSX-Фрагмент\\")}</> } }])}
 	</div>);
 export const Hello = ({ username }) => (__.jsx(\\"Привет <#1>-кун!1\\", [{ type: \\"div\\", props: { className: \`host\` } }, username]));
 export const ClickHere = ({ username }) => (__.jsx(\\"Привет&nbsp;<#1>, нажми <2>здесь</2> чтобы продолжить.\\", [{ type: \\"div\\", props: null }, username, { type: \\"a\\", props: { href: \\"#\\" } }]));
-export const Input = ({ hint, mode }) => (<div className={\`input \${mode}\`}>
+export const Input = ({ hint, mode, descr }) => (<div className={\`input \${mode}\`}>
 		
 		<input placeholder={__(\\"Подсказка: <#1>\\", [hint])}/>
 		<button value={__(\\"Войти\\")}/>
+		{descr}
 	</div>);
 export const InputWithText = ({ hint, mode }) => (__.jsx(\\"Представьтесь: <1/><2/>\\", [{ type: \\"div\\", props: { className: \`input \${mode}\` } }, { type: \\"input\\", props: { placeholder: __(\\"Подсказка: <#1>\\", [hint]) } }, { type: \\"button\\", props: { value: __(\\"Войти\\") } }]));
 export const Fragment = () => (<div>

@@ -20,6 +20,7 @@ export const Entities = () => (
 			<Input
 				hint="User&#8209;name"
 				mode="text"
+				descr={<>JSX-Фрагмент</>}
 			/>
 		</div>
 	</div>
@@ -35,11 +36,18 @@ export const ClickHere = ({username}) => (
 	</div>
 );
 
-export const Input = ({hint, mode}) => (
+type InputProps = {
+	hint: string;
+	mode: string;
+	descr?: JSX.Element;
+}
+
+export const Input = ({hint, mode, descr}: InputProps) => (
 	<div className={`input ${mode}`}>
 		{/* note: Bla-bla-bla */}
 		<input placeholder={`Подсказка: ${hint}`}/>
 		<button value="Войти"/>
+		{descr}
 	</div>
 );
 
