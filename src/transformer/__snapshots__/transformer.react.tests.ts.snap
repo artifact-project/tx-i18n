@@ -269,3 +269,21 @@ export class Dialog extends React.Component {
 }
 "
 `;
+
+exports[`transform react-fragments 1`] = `
+"import __ from \\"tx-i18n\\";
+import * as React from 'react';
+export const en = <>{__(\\"Check\\")}</>;
+export const ru = <>{__(\\"Проверочка\\")}</>;
+export const dict = {
+    en: () => ({
+        value: <>{__(\\"Hi!\\")}</>,
+    }),
+    ru: () => ({
+        value: <>{__(\\"Привет!\\")}</>,
+    }),
+    enVal: <>{__(\\"String\\")}</>,
+    ruVal: <>{__(\\"Строка\\")}</>,
+};
+"
+`;

@@ -4,7 +4,7 @@ import * as renderer from 'react-test-renderer';
 import { transform } from './test-utils';
 import i18n from '../../index';
 import { setDefaultLocale } from '../i18n/locale';
-import { getPhrases } from './transformer';
+import { getPhrases, resetPhrases } from './transformer';
 
 beforeEach(() => {
 	setDefaultLocale({});
@@ -17,6 +17,10 @@ describe('transform', () => {
 
 	it('react-composite', () => {
 		expect(transform('react-composite')).toMatchSnapshot();
+	});
+
+	it('react-fragments', () => {
+		expect(transform('react-fragments')).toMatchSnapshot();
 	});
 });
 
