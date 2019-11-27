@@ -342,3 +342,14 @@ const Fragment = () => (
 
  - `npm i`
  - `npm test`, [code coverage](./coverage/lcov-report/index.html)
+
+
+---
+
+### Support
+
+#### v0.5
+
+- webpack: 4.29
+- typescript: 3.0
+- awesome-typescript-loader: 5.2
