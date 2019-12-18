@@ -8,6 +8,7 @@
   "main": "index.js",
   "scripts": {
     "test": "jest --coverage",
+    "test-plugin": "ttsc",
     "ts-build": "tsc",
     "git-clean": "git clean -f",
     "prepublish": "npm run test && npm run ts-build",
@@ -31,6 +32,8 @@
     "react-test-renderer": "^16.4.2",
     "ts-jest": "^20.0.4",
     "ts-loader": "^5.3.3",
+    "ts-node": "^8.5.4",
+    "ttypescript": "^1.5.8",
     "typescript": "^3.0.1",
     "webpack": "^4.29.3"
   },

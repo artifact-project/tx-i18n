@@ -4,6 +4,7 @@ import { R_ENTITIES, decodeEntities } from './entities';
 type HumanTextChecker = (text: string, node: ts.Node) => boolean;
 
 interface Config {
+	verbose: (...args: any[]) => void;
 	isHumanText: HumanTextChecker;
 	normalizeText: (value: string) => string;
 	isTranslatableJsxAttribute: (attr: ts.JsxAttribute, element: ts.JsxOpeningLikeElement) => boolean;
@@ -50,7 +51,7 @@ function log(obj: object, ind = '', max = 3) {
 	return lines.join('\n');
 }
 
-export type Pharse = {
+export type Phrase = {
 	value: string;
 	file: string;
 	ctx: string;
@@ -67,12 +68,12 @@ export type Pharse = {
 }
 
 export type ContextedPhrases = {
-	[context: string]: Pharse[];
+	[context: string]: Phrase[];
 }
 
 export function contextedPhrasesForEach(
 	phrases: ContextedPhrases,
-	iterator: (phrase: Pharse, ctx: string) => void,
+	iterator: (phrase: Phrase, ctx: string) => void,
 ) {
 	Object.keys(phrases).forEach((ctx) => {
 		phrases[ctx].forEach((phrase) => {
@@ -83,7 +84,7 @@ export function contextedPhrasesForEach(
 
 export function contextedPhrasesFilter(
 	phrases: ContextedPhrases,
-	filter: (phrase: Pharse, ctx: string) => boolean,
+	filter: (phrase: Phrase, ctx: string) => boolean,
 ) {
 	const filteredPhrases = {} as ContextedPhrases;
 
@@ -564,6 +565,7 @@ export type TXConfig = Partial<Pick<Config,
 	| 'overrideHumanTextChecker'
 	| 'normalizeText'
 	| 'pharsesStore'
+	| 'verbose'
 >>
 
 const R_NORM_TEXT = /(>?)[\r\n]+[ \t]*(<?)/g;
@@ -576,9 +578,16 @@ export default function transformerFactory(config: TXConfig) {
 		phrasesWithContext = config.pharsesStore;
 	}
 
+	const verbose = config.verbose || (() => {});
+
 	return function transformer(context: ts.TransformationContext) {
+		verbose('transformer inited',);
+
 		return function visitor(file: ts.SourceFile) {
+			verbose('visitor inited:', file.fileName);
+
 			const cfg: Config = {
+				verbose,
 				fnName: '__',
 				packageName: 'tx-i18n',
 				fileName: file.fileName,
@@ -604,11 +613,19 @@ export default function transformerFactory(config: TXConfig) {
 				cfg.isHumanText = cfg.overrideHumanTextChecker(cfg.isHumanText);
 			}
 
+			const forceInclude = cfg.include ? cfg.include.some(checkPatterFile, cfg) : false;
+
 			if (cfg.exclude.some(checkPatterFile, cfg)) {
-				return file;
+				verbose(`File excluded:`, file.fileName, cfg.exclude);
+				if (forceInclude) {
+					verbose(`But included by`, cfg.exclude);
+				} else {
+					return file;
+				}
 			}
 
-			if (cfg.include && !cfg.include.some(checkPatterFile, cfg)) {
+			if (cfg.include && !forceInclude) {
+				verbose(`File not included:`, file.fileName, cfg.include);
 				return file;
 			}
 

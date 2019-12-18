@@ -23,6 +23,41 @@ npm i --save-dev tx-i18n
 
 ---
 
+### Usage with "pure" TypeScript
+
+[ttypescript](https://github.com/cevek/ttypescript) — it's not a typo 👐🏻
+
+```sh
+npm i --save-dev ttypescript
+```
+
+##### Add transformer-plugin to `tsconfig.json` in `compilerOptions` section
+
+```ts
+{
+  "compilerOptions": {
+    "plugins": [{
+      "transform": "tx-i18n/plugin",
+      "output": "./src/locale/default.ts"
+    }]
+  },
+}
+```
+
+
+##### Edit `package.json` and use `ttsc` (yep, double `t`) instead of `tsc`
+
+```json
+{
+  "name": "your-package",
+  "scripts": {
+    "build": "ttsc"
+  }
+}
+```
+
+---
+
 ### Usage with webpack
 
 ##### `webpack.config.js`

@@ -11,6 +11,13 @@
       "es5",
       "es2015"
     ],
+    "plugins": [
+      {
+        "transform": "./plugin.ts",
+        "verbose": true,
+        "include": ["transformer/fixture/object.ts"],
+      }
+    ]
   },
   "typeRoots": [
     "node_modules/@types",

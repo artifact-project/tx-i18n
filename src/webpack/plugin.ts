@@ -1,17 +1,10 @@
 import { writeFileSync } from 'fs';
-import { getPhrases, resetPhrases, ContextedPhrases } from '../transformer/transformer';
+import { getPhrases, resetPhrases } from '../transformer/transformer';
 import { Compiler } from 'webpack';
-import { ContextedLocale } from '../i18n/locale';
+import { phrasesStringify, StringifyOptions, StringifySeparateOutput } from '../utils/stringify';
 
-export type ExtractorSeparateOutput = (phrases: ContextedPhrases) => Array<{
-	file: string;
-	phrases: ContextedPhrases;
-}>
-
-export type ExtractorOptions = {
-	output: string | ExtractorSeparateOutput;
-	indent?: string;
-	stringify?: (locale: ContextedLocale) => string;
+export type ExtractorOptions = StringifyOptions & {
+	output: string | StringifySeparateOutput;
 	outputFileSystem?: {
 		writeFileSync(filename: string, content: string): void
 	};
@@ -39,57 +32,10 @@ export class Extractor {
 			return;
 		}
 
-		const jstr = JSON.stringify;
-		let {
-			output,
-			indent = '  ',
-			stringify,
-		} = this.options;
-
-		if (typeof output === 'string') {
-			const file = output;
-			output = (phrases) => [{
-				file,
-				phrases,
-			}];
-		}
-
-		output(getPhrases()).forEach(({file, phrases:contextedPhrases}) => {
-			const ctxLocale = Object.keys(contextedPhrases).reduce((contexted, context) => {
-				contexted[context] = contextedPhrases[context]
-					.map(phrase => phrase.value)
-					.sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()))
-					.reduce((locale, phrase) => {
-						locale[phrase] = phrase;
-						return locale;
-					}, {});
-
-				return contexted;
-			}, {} as ContextedLocale);
-
-			let content = '';
-
-			if (stringify) {
-				content = stringify(ctxLocale);
-			} else {
-				content = '{\n' + Object.keys(ctxLocale).map((context) => {
-					const locale = ctxLocale[context];
-
-					return (
-						`${indent}${jstr(context)}: {\n` +
-							Object
-								.keys(locale)
-								.map(key => `${indent}${indent}${jstr(key)}: ${jstr(locale[key])}`)
-								.join(',\n') +
-						`${indent}\n}`
-					);
-				}).join(',') + '\n}';
-
-				if (/\.[tj]sx?$/.test(file)) {
-					content = `export default ${content};`;
-				}
-			}
-
+		phrasesStringify({
+			...this.options,
+			phrases: getPhrases(),
+		}).forEach(({file, content}) => {
 			if (this._cache[file] !== content) {
 				this._cache[file] = content;
 				this.options.outputFileSystem.writeFileSync(
