@@ -1,6 +1,6 @@
 tx-i18n
 -------
-Auto-translate for your application (React supported)
+Auto-translate for your application (TSX/React supported)
 
 ```sh
 npm i --save-dev tx-i18n

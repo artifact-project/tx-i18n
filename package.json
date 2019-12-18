@@ -1,7 +1,7 @@
 {
   "name": "tx-i18n",
-  "version": "0.5.2",
-  "description": "Auto-translate for your application (React supported)",
+  "version": "0.6.0-rc.1",
+  "description": "Auto-translate for your application (TSX/React supported)",
   "author": "RubaXa <ibn@rubaxa.org>",
   "license": "MIT",
   "repository": "git@github.com:artifact-project/tx-i18n.git",
