@@ -14,6 +14,7 @@ type PluginOptions = Pick<TXConfig,
 	| 'fnName'
 	| 'packageName'
 > & {
+	humanTextCheckRegExp?: string;
 	verbose?: boolean;
 	output?: string | MultipleOutput[];
 	outputOptions?: {
@@ -52,9 +53,16 @@ export default function txPlugin(_: Program, pluginOptions: PluginOptions) {
 
 	console.log('txPlugin:', pluginOptions);
 
+	const extra: TXConfig = {verbose};
+
+	if (pluginOptions.humanTextCheckRegExp) {
+		const re = new RegExp(pluginOptions.humanTextCheckRegExp, 'i');
+		extra.isHumanText =  (val: string) => re.test(val);
+	}
+
 	return transformerFactory({
 		...pluginOptions,
-		verbose,
+		...Object(extra),
 	});
 }
 
