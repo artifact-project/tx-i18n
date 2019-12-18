@@ -1,6 +1,6 @@
 {
   "name": "tx-i18n",
-  "version": "0.6.0-rc.1",
+  "version": "0.6.0-rc.2",
   "description": "Auto-translate for your application (TSX/React supported)",
   "author": "RubaXa <ibn@rubaxa.org>",
   "license": "MIT",

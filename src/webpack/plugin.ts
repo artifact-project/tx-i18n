@@ -3,7 +3,7 @@ import { getPhrases, resetPhrases } from '../transformer/transformer';
 import { Compiler } from 'webpack';
 import { phrasesStringify, StringifyOptions, StringifySeparateOutput } from '../utils/stringify';
 
-export type ExtractorOptions = StringifyOptions & {
+export type ExtractorOptions = Omit<StringifyOptions, 'phrases'> & {
 	output: string | StringifySeparateOutput;
 	outputFileSystem?: {
 		writeFileSync(filename: string, content: string): void
