@@ -20,6 +20,7 @@ npm i --save-dev tx-i18n
   - TSX/React: Text, Expression, Attributes, Fragment & Tags (any complexity)
   - **Not supproted**
     - Object keys
+  - **TSX/React** and [Storybook Addons](#storybook)
 
 ---
 
@@ -38,7 +39,7 @@ npm i --save-dev ttypescript
   "compilerOptions": {
     "plugins": [{
 	  "transform": "tx-i18n/plugin",
-	  "humanTextCheckRegExp": "а-яё",
+	  "humanTextCheckRegExp": "[а-яё]",
       "output": "./src/locale/default.ts"
     }]
   },
@@ -156,6 +157,35 @@ export default {
 		'Ваши данные': 'Ваши данные',
 	},
 };
+```
+
+---
+
+<a name="storybook">
+
+### Storybook
+
+#### 1. Create a file called `addons.js` in your Storybook config, if there is no any and append following line:
+
+```js
+import 'tx-i18n/storybook-addon/register';
+```
+
+#### 2. Then in your story's config or in a global config for the project (`config.js`)
+
+```js
+import { addParameters, addDecorator } from '@storybook/react';
+import { withTXI18n } from 'tx-i18n/storybook-addon';
+import en from '../locale/en'; // any locale of your application
+
+addParameters({
+  'tx-i18n': {
+	locales: {en},
+	defaultLang: 'ru',
+  },
+});
+
+addDecorator(withTXI18n);
 ```
 
 ---

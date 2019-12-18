@@ -9,18 +9,27 @@
   "scripts": {
     "test": "jest --coverage",
     "test-plugin": "ttsc",
-    "ts-build": "tsc",
-    "git-clean": "git clean -f",
-    "prepublish": "npm run test && npm run ts-build",
-    "postpublish": "npm run git-clean"
+    "build": "tsc",
+    "clean": "git clean -f",
+    "prepublish": "npm run test && npm run build",
+    "postpublish": "npm run clean"
   },
   "files": [
     "*.js",
     "*.d.ts",
+    "*.js.map",
     "src/*/*.js",
-    "src/*/*.d.ts"
+    "src/*/*.d.ts",
+    "src/*/*.js.map",
+    "storybook-addon/*.js",
+    "storybook-addon/*.d.ts",
+    "storybook-addon/*.js.map"
   ],
   "devDependencies": {
+    "@storybook/addons": "^5.2.8",
+    "@storybook/api": "^5.2.8",
+    "@storybook/channels": "^5.2.8",
+    "@storybook/components": "^5.2.8",
     "@types/jest": "^19.2.3",
     "@types/node": "^10.17.11",
     "@types/react": "^16.9.16",
@@ -36,7 +45,11 @@
     "webpack": "^4.41.3"
   },
   "peerDependencies": {
-    "react": ">=15.0.0"
+    "@storybook/addons": ">=5",
+    "@storybook/api": ">=5",
+    "@storybook/channels": ">=5",
+    "@storybook/components": ">=5",
+    "react": ">=15"
   },
   "jest": {
     "transform": {
