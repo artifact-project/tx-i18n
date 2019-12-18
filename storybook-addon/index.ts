@@ -30,38 +30,35 @@ function TXI18NProvider(props: TXI18NProviderProps) {
 		locales,
 		defaultLang,
 	} = props;
-	const lang = getLang();
-	const forceUpdate = useForceUpdate();
+	const [lang, setLang] = useLang(defaultLang);
 
 	useEffect(() => {
 		Object.entries(locales).forEach(([lang, locale]) => {
 			setLocale(lang, locale);
 		});
 
-		setLang(defaultLang);
-
 		const handle = (val: string) => {
 			console.log(`[tx-i18n] Lang switched to "${val}"`);
 			setLang(val);
-			forceUpdate();
 		};
 
 		channel.on(ADDON_EVENT_SET, handle);
 		return () => {
 			channel.removeListener(ADDON_EVENT_SET, handle);
 		};
-	}, [defaultLang]);
+	}, []);
 
 	return createElement('div', {lang}, children());
 }
 
-
-function useForceUpdateReducer(x: number) {
-	return x + 1;
+function langReducer(prev: string, lang: string) {
+    console.log(`[tx-i18n] Lang switched from "${prev}" to "${lang}"`);
+    setLang(lang);
+    return lang;
 }
 
-function useForceUpdate(): () => void {
-	return useReducer(useForceUpdateReducer, 0)[1] as any;
+function useLang(lang: string) {
+    return useReducer(langReducer, lang);
 }
 
 if (module && (module as any).hot && (module as any).hot.decline) {
