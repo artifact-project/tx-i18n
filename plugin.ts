@@ -14,6 +14,7 @@ type PluginOptions = Pick<TXConfig,
 	| 'fnName'
 	| 'packageName'
 > & {
+	valueWrapper?: [string, string];
 	humanTextCheckRegExp?: string;
 	verbose?: boolean;
 	output?: string | MultipleOutput[];

@@ -11,6 +11,7 @@ export type StringifyOptions = {
 	output?: string | StringifySeparateOutput;
 	indent?: string;
 	stringify?: (locale: ContextedLocale) => string;
+	valueWrapper?: [string, string];
 	outputFileSystem?: {
 		writeFileSync(filename: string, content: string): void
 	};
@@ -24,6 +25,7 @@ export function phrasesStringify(options: StringifyOptions) {
 		output = './locale.ts',
 		indent = '  ',
 		stringify,
+		valueWrapper,
 	} = options;
 
 	if (typeof output === 'string') {
@@ -33,6 +35,11 @@ export function phrasesStringify(options: StringifyOptions) {
 			phrases,
 		}];
 	}
+
+	const valueStringify = Array.isArray(valueWrapper)
+		? (value: any) => valueWrapper[0] + jsonStringify(value) + valueWrapper[1]
+		: jsonStringify
+	;
 
 	return output(phrases).map(({file, phrases:contextedPhrases}) => {
 		let content = '';
@@ -59,9 +66,9 @@ export function phrasesStringify(options: StringifyOptions) {
 					`${indent}${jsonStringify(context)}: {\n` +
 						Object
 							.keys(locale)
-							.map(key => `${indent}${indent}${jsonStringify(key)}: ${jsonStringify(locale[key])}`)
+							.map(key => `${indent}${indent}${jsonStringify(key)}: ${valueStringify(locale[key])}`)
 							.join(',\n') +
-					`${indent}\n}`
+					`\n${indent}}`
 				);
 			}).join(',') + '\n}';
 
