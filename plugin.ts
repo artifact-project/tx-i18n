@@ -14,12 +14,12 @@ type PluginOptions = Pick<TXConfig,
 	| 'fnName'
 	| 'packageName'
 > & {
-	valueWrapper?: [string, string];
 	humanTextCheckRegExp?: string;
 	verbose?: boolean;
 	output?: string | MultipleOutput[];
 	outputOptions?: {
 		indent?: string;
+		valueWrapper?: [string, string];
 	};
 };
 
@@ -36,6 +36,7 @@ export default function txPlugin(_: Program, pluginOptions: PluginOptions) {
 			output: prepareOutput(output),
 			phrases: getPhrases(),
 			indent: outputOptions.indent,
+			valueWrapper: outputOptions.valueWrapper,
 		}).forEach(({file, content}) => {
 			verbose('Write locale file', file);
 			writeFileSync(file, content);

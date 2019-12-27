@@ -1,6 +1,6 @@
 {
   "name": "tx-i18n",
-  "version": "0.6.0-rc.6",
+  "version": "0.6.0-rc.7",
   "description": "Auto-translate for your application (TSX/React supported)",
   "author": "RubaXa <ibn@rubaxa.org>",
   "license": "MIT",
@@ -64,5 +64,9 @@
       "js",
       "json"
     ]
+  },
+  "dependencies": {
+    "@types/html-entities": "^1.2.16",
+    "html-entities": "^1.2.1"
   }
 }

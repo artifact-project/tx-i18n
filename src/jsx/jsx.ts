@@ -1,5 +1,6 @@
 import { getTranslate, getLang } from '../i18n/locale';
 import { createCompiler } from '../i18n/compiler';
+import { AllHtmlEntities } from 'html-entities';
 
 type JsxElement = {
 	type: string | Function;
@@ -47,9 +48,9 @@ export function jsxFactory(
 	};
 }
 
-const decoder = document.createElement('i');
 const entities = {};
 const R_ENTITIES = /&[a-z]+;/g;
+const decoder = new AllHtmlEntities();
 
 function htmlDecode(text: string) {
 	return text.indexOf('&') > -1
@@ -60,8 +61,7 @@ function htmlDecode(text: string) {
 
 function htmlEntityDecode(entity: string) {
 	if (!entities.hasOwnProperty(entity)) {
-		decoder.innerHTML = entity;
-		entities[entity] = decoder.textContent;
+		entities[entity] = decoder.decode(entity);
 	}
 
 	return entities[entity]
