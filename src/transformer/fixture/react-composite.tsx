@@ -62,21 +62,21 @@ export class Dialog extends React.Component<any> {
 					`}</h2>
 					{/** @tx-i18n context: form */}
 					<fieldset>
-						<div className="row">
+						<div data-key="props" className="row">
 							<div className="col">Ширина:</div>
 							<div className="col">123px</div>
 						</div>
-						<div className="row">
+						<div data-key="cbx" className="row">
 							<div className="col">
 								Да{' '}
 								<input type="checked" checked/>
 							</div>
 						</div>
-						<div>
+						<div data-key="inner">
 							{this.innerRender({...props, value: 'Тест'})}
 							Окей
 						</div>
-						<p>
+						<p data-key="footer">
 							<button value="Отмена" />
 							или
 							<Button

@@ -1,13 +1,10 @@
-import * as ts from 'typescript';
-import * as React from 'react';
-import * as renderer from 'react-test-renderer';
-import { transform } from './test-utils';
-import i18n from '../../index';
+import { transform, reactLoad, reactRender } from './test-utils';
 import { setDefaultLocale } from '../i18n/locale';
-import { getPhrases, resetPhrases } from './transformer';
+import { getPhrases } from './transformer';
+import { plural } from '../../icu/plural/en';
 
 beforeEach(() => {
-	setDefaultLocale({});
+	setDefaultLocale({}, plural as any);
 })
 
 describe('transform', () => {
@@ -25,86 +22,51 @@ describe('transform', () => {
 });
 
 describe('render', () => {
-	function load(name): any {
-		try {
-			const exports = {};
-			const source = transform(name, {
-				module: ts.ModuleKind.CommonJS,
-				target: ts.ScriptTarget.ES5,
-				jsx: ts.JsxEmit.React,
-			});
-
-			Function('exports, require', source)(
-				exports,
-				(name) => {
-					if (name === 'tx-i18n') {
-						return {default: i18n};
-					} else if (name.substr(0, 2) === './') {
-						return load(name.substr(2));
-					} else {
-						return require(name);
-					}
-				},
-			);
-
-			return exports;
-		} catch (err) {
-			console.error(err);
-		}
-	}
-
-	function render(Block, props = {}) {
-		return renderer
-			.create(React.createElement(Block, props))
-			.toJSON()
-		;
-	}
-
 	describe('react', () => {
-		const blocks = load('react');
+		const blocks = reactLoad('react');
 
 		it('react: Static', () => {
-			expect(render(blocks.Static)).toMatchSnapshot();
+			expect(reactRender(blocks.Static)).toMatchSnapshot();
 		});
 
 		it('react: Entities', () => {
-			expect(render(blocks.Entities)).toMatchSnapshot();
+			expect(reactRender(blocks.Entities)).toMatchSnapshot();
 		});
 
 		it('react: Hello', () => {
-			expect(render(blocks.Hello, {username: 'Рубаха'})).toMatchSnapshot();
+			expect(reactRender(blocks.Hello, {username: 'Рубаха'})).toMatchSnapshot();
 		});
 
 		it('react: ClickHere', () => {
-			expect(render(blocks.ClickHere, {username: 'Рубаха'})).toMatchSnapshot();
+			expect(reactRender(blocks.ClickHere, {username: 'Рубаха'})).toMatchSnapshot();
 		});
 
 		it('react: Fragment', () => {
-			expect(render(blocks.Fragment)).toMatchSnapshot();
+			expect(reactRender(blocks.Fragment)).toMatchSnapshot();
 		});
 	});
 
 	describe('react-composite', () => {
-		const blocks = load('react-composite');
+		const blocks = reactLoad('react-composite');
 
 		it('react-composite: DeepHello', () => {
 			setDefaultLocale({
 				default: {
-					'Привет <#1>-кун!1': 'Hi, <#1>-kun!',
-					'<1/> или Нет!': '<1/> or No!',
+					'Привет {v1}-кун!1': 'Hi, {v1}-kun!',
+					'<Hello1/> или Нет!': '<Hello1/> or No!',
 				},
-			});
-			expect(render(blocks.DeepHello, {username: 'i18n'})).toMatchSnapshot();
+			}, plural);
+			expect(reactRender(blocks.DeepHello, {username: 'i18n'})).toMatchSnapshot();
 		});
 
 		it('react-composite: DeepHello (invert)', () => {
 			setDefaultLocale({
 				default: {
-					'Привет <#1>-кун!1': '<#1>, HI!',
-					'<1/> или Нет!': 'No or <1/>!',
+					'Привет {v1}-кун!1': '{v1}, HI!',
+					'<Hello1/> или Нет!': 'No or <Hello1/>!',
 				},
-			});
-			expect(render(blocks.DeepHello, {username: 'i18n'})).toMatchSnapshot();
+			}, plural);
+			expect(reactRender(blocks.DeepHello, {username: 'i18n'})).toMatchSnapshot();
 		});
 
 		it('react-composite: Dialog', () => {
@@ -114,19 +76,22 @@ describe('render', () => {
 					'Хорошо': 'OK',
 					'Отмена': 'Cancel',
 					'Ширина:': 'Width:',
-					'Да<#1><2/>': '<2/> — fail',
+					'Да{v1}<input2/>': '<input2/> — fail',
 					'Тест \"фу\" бар': 'Test "foo" bar',
+					'{v1} Окей': 'fail:okey',
 				},
 				form: {
 					'Сохранить': 'Save',
-					'<1/>или<2/>': '<1/> or <2/>',
+					'<button1/>или<Button2/>': '<button1/> or <Button2/>',
 					'Отмена': 'Form cancel',
-					'Да<#1><2/>': '<2/> — YES',
+					'Да{v1}<input2/>': '<input2/> — YES',
+					'{v1} Окей': 'Okey {v1}',
 				},
-			});
+			}, plural);
 
 			expect(Object.keys(getPhrases())).toEqual(['default', 'form']);
-			expect(render(blocks.Dialog)).toMatchSnapshot();
+			// expect(getPhrases()).toEqual({});
+			expect(reactRender(blocks.Dialog)).toMatchSnapshot();
 		});
 	});
 });

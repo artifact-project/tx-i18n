@@ -1,5 +1,7 @@
 import * as ts from 'typescript';
 import { R_ENTITIES, decodeEntities } from './entities';
+import { normJsxElement, getJsxTagName } from './utils';
+import { icu } from '../utils/icu';
 
 type HumanTextChecker = (text: string, node: ts.Node) => boolean;
 
@@ -9,7 +11,8 @@ interface Config {
 	normalizeText: (value: string) => string;
 	isTranslatableJsxAttribute: (attr: ts.JsxAttribute, element: ts.JsxOpeningLikeElement) => boolean;
 	overrideHumanTextChecker?: (isHumanText: HumanTextChecker) => HumanTextChecker;
-	fnName: string;
+	textFnName: string;
+	jsxFnName: string;
 	packageName: string
 	fileName: string;
 	include: string[];
@@ -23,14 +26,15 @@ interface Config {
 }
 
 const R_IS_TAG = /^[a-z0-9:]+$/;
+const stringify = JSON.stringify;
 
-function log(obj: object, ind = '', max = 3) {
+function log(obj: object | string | number | boolean, ind = '', max = 3) {
 	if (obj == null || /number|string|boolean/.test(typeof obj)) {
 		console.log(obj);
 		return;
 	}
 
-	const copy = {...obj};
+	const copy = {...Object(obj)};
 	let lines = [];
 	delete copy['parent'];
 
@@ -146,7 +150,7 @@ function createImport(name, path) {
 	);
 }
 
-function addImport(imports: Config['imports'], name, path) {
+function addImport(imports: Config['imports'], name: string, path: string) {
 	// imports[name] = createImport(name, path);
 	// TypeError: Cannot set property text of #<IdentifierObject> which has only a getter
 
@@ -164,20 +168,21 @@ function useNativeImport(module: ts.ModuleKind) {
 	return module === ts.ModuleKind.ESNext || module === ts.ModuleKind.ES2015;
 }
 
-function i18nId(cfg: Config, prop?: string) {
-	const importDecl = addImport(cfg.imports, cfg.fnName, cfg.packageName);
-	let id: ts.Expression = useNativeImport(cfg.compilerOptions.module)
-		? ts.createIdentifier(cfg.fnName)
-		: ts.getGeneratedNameForNode(importDecl);
+function i18nId(cfg: Config, type: 'text' | 'jsx') {
+	const fnName = type === 'jsx' ? cfg.jsxFnName : cfg.textFnName;
+	const pkgFile = `${cfg.packageName}/${type}`;
+	const importDecl = addImport(cfg.imports, fnName, pkgFile);
+	const useNative = useNativeImport(cfg.compilerOptions.module);
 
-	if (!useNativeImport(cfg.compilerOptions.module)) {
-		id = ts.createPropertyAccess(id, 'default');
-	}
+	let id: ts.Expression = useNative
+		? ts.createIdentifier(fnName)
+		: ts.getGeneratedNameForNode(importDecl)
+	;
 
-	return prop ? ts.createPropertyAccess(id, prop) : id;
+	return useNative ? id : ts.createPropertyAccess(id, 'default');
 }
 
-function i18nWrap(cfg: Config, prop: string, args: ts.Expression[]) {
+function i18nWrap(cfg: Config, type: 'text' | 'jsx', args: ts.Expression[]) {
 	if (phrasesContext.length > 1) {
 		if (args.length === 1) {
 			args.push(ts.createArrayLiteral());
@@ -186,7 +191,7 @@ function i18nWrap(cfg: Config, prop: string, args: ts.Expression[]) {
 		args.push(createLiteral(phrasesContext[0]));
 	}
 
-	return ts.createCall(i18nId(cfg, prop), [], args);
+	return ts.createCall(i18nId(cfg, type), [], args);
 }
 
 function visited<T extends ts.Node>(node: T): T {
@@ -194,8 +199,12 @@ function visited<T extends ts.Node>(node: T): T {
 	return node;
 }
 
+function isVisited(node: ts.Node) {
+	return node['__visited__'] !== void 0
+}
+
 function createLiteral(val: string) {
-	const node = ts.createIdentifier(JSON.stringify(val));
+	const node = ts.createIdentifier(stringify(val));
 	return visited(node);
 }
 
@@ -209,8 +218,12 @@ function hasJsxTextChildren(node: ts.JsxElement | ts.JsxFragment, cfg: Config) {
 	});
 }
 
-function wrapStringLiteral(node: ts.StringLiteralLike, cfg: Config, decode?: boolean) {
-	let text = normalizeText(cfg, node.getText());
+function wrapStringLiteral(node: ts.Node, cfg: Config, decode?: boolean) {
+	if (!ts.isStringLiteralLike(node)) {
+		return visited(node);
+	}
+
+	let text = normalizeText(cfg, icu.quote(node.getText()));
 
 	if (!cfg.isHumanText(text, node)) {
 		return visited(node);
@@ -222,17 +235,87 @@ function wrapStringLiteral(node: ts.StringLiteralLike, cfg: Config, decode?: boo
 		text = decodeEntities(text);
 	}
 
-	return i18nWrap(cfg, null, [ts.createIdentifier(text)]);
+	return i18nWrap(cfg, 'text', [ts.createIdentifier(text)]);
+}
+
+const rICUFn = /^(plural|select)/i;
+
+function parseICU(node: ts.Expression, idx: number) {
+	if (node.end < 0 || node.pos < 0) {
+		return null;
+	}
+
+	const len = node.getChildCount();
+
+
+	if (len === 4) {
+		const children = node.getChildren();
+		const fn = children[0];
+		const parsedName = fn.getText().match(rICUFn);
+
+		if (0
+			|| (parsedName === null) // имя не подходит под маску
+			|| (children[1].kind !== ts.SyntaxKind.OpenParenToken) // проверяем "("
+			|| (children[3].kind !== ts.SyntaxKind.CloseParenToken) // и ")"
+		) {
+			return null;
+		}
+
+		const args = children[2].getChildren();
+
+		if (0
+			|| args.length !== 3
+			|| !ts.isObjectLiteralExpression(args[2])
+		) {
+			return null;
+		}
+
+		const val = args[0];
+		const parts = [] as string[];
+
+		(args[2] as ts.ObjectLiteralExpression).properties.forEach((node) => {
+			if (ts.isPropertyAssignment(node)) {
+				parts.push(`${node.name.getText()} {${node.initializer.getText().slice(1, -1)}}`);
+			}
+		});
+
+		const expr = ts.createObjectLiteral([
+			ts.createPropertyAssignment('$', fn as ts.Expression),
+			ts.createPropertyAssignment('_', val as ts.Expression),
+		]);
+
+		return {
+			value: `{v${idx}, ${parsedName[0].toLowerCase()}, ${parts.join(' ')}}`,
+			expr,
+		};
+	}
+
+	return null;
 }
 
 function wrapTemplateExpression(node: ts.TemplateExpression, context, cfg: Config) {
 	const args = [];
-	let phrase = node.head.text;
+	let isPlainText = node.templateSpans.length === 1;
+	let phrase = '';
 
 	node.templateSpans.forEach((span, idx) => {
-		phrase += `<#${(idx + 1)}>${span.literal.text}`;
-		args.push(visitNodeAndChildren(span.expression, context, cfg));
+		const xicu = parseICU(span.expression, idx + 1)
+
+		if (xicu !== null) {
+			isPlainText = false;
+			phrase += `${xicu.value}${span.literal.text}`;
+			args.push(xicu.expr);
+		} else if (ts.isStringLiteralLike(span.expression)) {
+			phrase += `${span.expression.text}${span.literal.text}`;
+		} else {
+			isPlainText = false;
+			phrase += `{v${(idx + 1)}}${icu.quote(span.literal.text)}`; // todo: var name
+			args.push(visitNodeAndChildren(span.expression, context, cfg));
+		}
 	});
+
+	// Вот теперь, добавляем `head`
+	phrase = `${isPlainText ? node.head.text : icu.quote(node.head.text)}${phrase}`;
 
 	if (!cfg.isHumanText(phrase, node)) {
 		return visited(node);
@@ -241,25 +324,64 @@ function wrapTemplateExpression(node: ts.TemplateExpression, context, cfg: Confi
 	phrase = normalizeText(cfg, phrase);
 	savePhrase(phrase, node, cfg);
 
-	return i18nWrap(cfg, null, [
+	if (isPlainText) {
+		return i18nWrap(cfg, 'text', [createLiteral(phrase)]);
+	}
+
+	return i18nWrap(cfg, 'text', [
 		createLiteral(phrase),
 		ts.createArrayLiteral(args),
 	]);
 }
 
-function visitNode(node: ts.Node, context, cfg: Config): ts.Node {
+// type Scope = {
+// 	type: 'root' | 'literal' | 'template' | 'jsx' | 'plural';
+// 	parent: Scope;
+// }
+
+// let activeScope: Scope = {
+// 	type: 'root',
+// 	parent: null,
+// }
+
+// function scoped<R extends any>(
+// 	type: Scope['type'],
+// 	executer: (scope: Scope) => R,
+// ): R {
+// 	const parent = activeScope;
+// 	activeScope = {
+// 		type,
+// 		parent,
+// 	};
+
+// 	const result = executer(activeScope);
+
+// 	activeScope = parent;
+
+// 	return result
+// }
+// type VisitState = {
+// 	readonly jsx: boolean;
+// 	icu: ReturnType<typeof parseICU>[];
+// }
+
+function visitNode(
+	node: ts.Node,
+	context: ts.TransformationContext,
+	cfg: Config,
+): ts.Node {
 	const {
 		isHumanText,
 	} = cfg;
 
-	if (node['__visited__']) {
+	if (isVisited(node)) {
 		return node;
 	}
 
-	if (
-		(!node.parent || !ts.isImportDeclaration(node.parent))
-		&& (
-			ts.isStringLiteral(node)
+	if (1
+		&& (!node.parent || !ts.isImportDeclaration(node.parent))
+		&& (0
+			|| ts.isStringLiteral(node)
 			|| ts.isNoSubstitutionTemplateLiteral(node)
 		)
 		&& isHumanText(node.getFullText(), node)
@@ -267,13 +389,12 @@ function visitNode(node: ts.Node, context, cfg: Config): ts.Node {
 		const {parent} = node;
 
 		if (parent) {
-			if (
-				ts.isPropertyAssignment(parent) && parent.name === node
+			if (0
+				|| ts.isPropertyAssignment(parent) && parent.name === node
 				|| ts.isElementAccessExpression(parent)
 			) {
 				return node;
 			}
-
 
 			const attr = ts.isJsxAttribute(parent)
 				? parent
@@ -282,19 +403,21 @@ function visitNode(node: ts.Node, context, cfg: Config): ts.Node {
 
 			// JSX Attribute
 			if (attr) {
-				if (
-					!isTagName(attr.parent.parent.tagName.getText())
+				if (0
+					|| !isTagName(attr.parent.parent.tagName.getText())
 					|| cfg.isTranslatableJsxAttribute(attr, attr.parent.parent)
 				) {
 					const newNode = wrapStringLiteral(node, cfg, true);
-					return newNode === node ? node : ts.createJsxExpression(undefined, newNode);
+					return newNode === node ? node : ts.createJsxExpression(undefined, newNode as ts.Expression);
 				}
+
 				return node;
 			}
 		}
 
 		return wrapStringLiteral(node, cfg);
 	} else if (ts.isTemplateExpression(node)) {
+		// Literal template
 		const {parent} = node;
 
 		if (parent && (ts.isComputedPropertyName(parent) || ts.isElementAccessExpression(parent))) {
@@ -315,6 +438,7 @@ function visitNode(node: ts.Node, context, cfg: Config): ts.Node {
 
 		return wrapTemplateExpression(node, context, cfg);
 	} else if ((ts.isJsxElement(node) || ts.isJsxFragment(node)) && hasJsxTextChildren(node, cfg)) {
+		// JSX
 		const args = [];
 		let simple = true;
 		let gpart = 0;
@@ -323,25 +447,37 @@ function visitNode(node: ts.Node, context, cfg: Config): ts.Node {
 
 		node.children.forEach(function processing(child) {
 			if (ts.isJsxElement(child)) {
-				let part = ++gpart;
+				let tagName = `${getJsxTagName(child)}${++gpart}`;
 
 				simple = false;
-				phrase += `<${part}>`;
+				phrase += `<${tagName}>`;
 				args.push(jsxTagToObject(child, context, cfg));
 				child.children.forEach(processing)
-				phrase += `</${part}>`;
+				phrase += `</${tagName}>`;
 			} else if (ts.isJsxText(child)) {
 				hasText = true;
 				phrase += child.getFullText();
 			} else if (ts.isJsxExpression(child)) {
 				if (child.expression) {
+					++gpart
 					simple = false;
-					phrase += `<#${++gpart}>`;
+
+					if (ts.isCallExpression(child.expression)) {
+						const icu = parseICU(child.expression, gpart);
+
+						if (icu !== null) {
+							phrase += icu.value;
+							args.push(icu.expr);
+							return;
+						}
+					}
+
+					phrase += `{v${gpart}}`; // todo: var name
 					args.push(visitNode(child.expression, context, cfg));
 				}
 			} else if (ts.isJsxSelfClosingElement(child)) {
 				simple = false;
-				phrase += `<${++gpart}/>`;
+				phrase += `<${getJsxTagName(child)}${++gpart}/>`;
 				args.push(jsxTagToObject(child, context, cfg));
 			} else {
 				log(child);
@@ -364,7 +500,7 @@ function visitNode(node: ts.Node, context, cfg: Config): ts.Node {
 					node.openingFragment,
 					[ts.createJsxExpression(undefined, i18nWrap(
 						cfg,
-						null,
+						'text',
 						[].concat(
 							createLiteral(phrase),
 							args.length ? ts.createArrayLiteral(args) : [],
@@ -378,7 +514,7 @@ function visitNode(node: ts.Node, context, cfg: Config): ts.Node {
 					node.openingElement,
 					[ts.createJsxExpression(undefined, i18nWrap(
 						cfg,
-						null,
+						'text',
 						[].concat(
 							createLiteral(phrase),
 							args.length ? ts.createArrayLiteral(args) : [],
@@ -404,11 +540,21 @@ function visitNode(node: ts.Node, context, cfg: Config): ts.Node {
 			],
 		);
 
-		if (ts.isJsxElement(node.parent)) {
+		if (ts.isJsxElement(node.parent) || ts.isJsxFragment(node.parent)) {
 			return ts.createJsxExpression(undefined, callExp);
 		}
 
 		return callExp;
+	} else if (ts.isCallExpression(node)) {
+		const icu = parseICU(node, 1);
+
+		if (icu !== null) {
+			savePhrase(icu.value, node, cfg);
+			return i18nWrap(cfg, 'text', [
+				createLiteral(icu.value),
+				ts.createArrayLiteral([icu.expr]),
+			]);
+		}
 	}
 
 	return node;
@@ -493,7 +639,7 @@ function jsxTagToObject(
 	context: object,
 	cfg: Config,
 ) {
-	const element = ts.isJsxElement(node) ? node.openingElement : node;
+	const element = normJsxElement(node);
 	const {attributes} = element;
 
 	let type = element.tagName.getFullText();
@@ -514,7 +660,7 @@ function jsxTagToObject(
 							value = ts.createIdentifier(initializer.getText().slice(1, -1));
 						}
 					} else {
-						value = wrapStringLiteral(initializer, cfg);
+						value = wrapStringLiteral(initializer, cfg) as ts.Expression;
 					}
 				} else {
 					value = ts.isJsxExpression(initializer) ? initializer.expression : initializer;
@@ -556,7 +702,8 @@ function stringifyObjectKey(name: string) {
 }
 
 export type TXConfig = Partial<Pick<Config,
-	| 'fnName'
+	| 'textFnName'
+	| 'jsxFnName'
 	| 'packageName'
 	| 'include'
 	| 'exclude'
@@ -588,7 +735,8 @@ export default function transformerFactory(config: TXConfig) {
 
 			const cfg: Config = {
 				verbose,
-				fnName: '__',
+				textFnName: '__',
+				jsxFnName: '__jsx',
 				packageName: 'tx-i18n',
 				fileName: file.fileName,
 				exclude: ['/tx-i18n/', '/node_modules/'],
@@ -598,7 +746,7 @@ export default function transformerFactory(config: TXConfig) {
 				normalizeText: (value: string) => value.replace(R_NORM_TEXT, NORM_TEXT_FN),
 				isHumanText: (value: string) => /[\wа-яё]/i.test(
 					value.trim()
-						.replace(/<\d+\/?>/g, '')
+						.replace(/\{v\d+\}/g, '')
 						.replace(/\d+([^\s]+)?/g, '')
 						.trim()
 				),
@@ -640,11 +788,19 @@ export default function transformerFactory(config: TXConfig) {
 							.concat(result.statements),
 					);
 				} catch (err) {
-					console.error(`\x1b[31m\n[tx-i18n] [update] ${cfg.fileName}\n---\n${err.toString()}\n\x1b[0m`);
+					console.error([
+						`\x1b[31m\n[tx-i18n] [update] ${cfg.fileName}`,
+						`---`,
+						`${err.toString()}\n\x1b[0m`
+					].join('\n'));
 					return file;
 				}
 			} catch (err) {
-				console.error(`\x1b[31m\n[tx-i18n] [visit] ${cfg.fileName}\n---\n${err.toString()}\n\x1b[0m`);
+				console.error([
+					`\x1b[31m\n[tx-i18n] [visit] ${cfg.fileName}`,
+					`---`,
+					`${err.toString()}\n\x1b[0m`,
+				].join('\n'));
 				return file;
 			}
 		}

@@ -1,7 +1,7 @@
-import { jsxFactory } from './jsx';
+import { i18nJSXFactory } from './jsx';
 
 it('jsx', () => {
-	const jsx = jsxFactory((type, props, ...children) => ({
+	const jsx = i18nJSXFactory((type, props, ...children) => ({
 		type,
 		props: {
 			...Object(props),
@@ -10,7 +10,7 @@ it('jsx', () => {
 	}));
 
 	expect(jsx(
-		"Привет <#1>, нажми <2>здесь</2> чтобы продолжить<3/>.",
+		`Привет {v1}, нажми <a2>здесь</a2> чтобы продолжить<i3/>.`,
 		[
 			{type: 'div', props: null},
 			"Вася",

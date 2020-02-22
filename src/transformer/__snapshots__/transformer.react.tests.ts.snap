@@ -125,6 +125,7 @@ exports[`render react-composite react-composite: Dialog 1`] = `
     <fieldset>
       <div
         className="row"
+        data-key="props"
       >
         <div
           className="col"
@@ -139,6 +140,7 @@ exports[`render react-composite react-composite: Dialog 1`] = `
       </div>
       <div
         className="row"
+        data-key="cbx"
       >
         <div
           className="col"
@@ -150,10 +152,14 @@ exports[`render react-composite react-composite: Dialog 1`] = `
            — YES
         </div>
       </div>
-      <div>
-        Окей
+      <div
+        data-key="inner"
+      >
+        Okey 
       </div>
-      <p>
+      <p
+        data-key="footer"
+      >
         <button
           value="Form cancel"
         />
@@ -187,40 +193,42 @@ exports[`render react-composite react-composite: Dialog 1`] = `
 `;
 
 exports[`transform react 1`] = `
-"import __ from \\"tx-i18n\\";
+"import __jsx from \\"tx-i18n/jsx\\";
+import __ from \\"tx-i18n/text\\";
 import * as React from 'react';
-export const Static = () => (__.jsx(\\"Вова, купи&nbsp;\\\\\\"гречу\\\\\\"!\\", [{ type: \\"div\\", props: { className: 'host' } }]));
+export const Static = () => (__jsx(\\"Вова, купи&nbsp;\\\\\\"гречу\\\\\\"!\\", [{ type: \\"div\\", props: { className: 'host' } }]));
 export const Entities = () => (<div className={'host'}>
 		<p title={__(\\"Foo bar\\")}>
-			{__.jsx(\\"Left &mdash; Right\\", [{ type: \\"h2\\", props: null }])}
+			{__jsx(\\"Left &mdash; Right\\", [{ type: \\"h2\\", props: null }])}
 		</p>
 		<div>
 			<Input hint={__(\\"Space — bar\\")} mode={__(\\"text\\")}/>
 		</div>
-		{__.jsx(\\"Enter:<1/>\\", [{ type: \\"div\\", props: null }, { type: Input, props: { hint: (), mode: (), descr: <>{__(\\"JSX-Фрагмент\\")}</> } }])}
+		{__jsx(\\"Enter:<Input1/>\\", [{ type: \\"div\\", props: null }, { type: Input, props: { hint: (), mode: (), descr: <>{__(\\"JSX-Фрагмент\\")}</> } }])}
 	</div>);
-export const Hello = ({ username }) => (__.jsx(\\"Привет <#1>-кун!1\\", [{ type: \\"div\\", props: { className: \`host\` } }, username]));
-export const ClickHere = ({ username }) => (__.jsx(\\"Привет&nbsp;<#1>, нажми <2>здесь</2> чтобы продолжить.\\", [{ type: \\"div\\", props: null }, username, { type: \\"a\\", props: { href: \\"#\\" } }]));
+export const Hello = ({ username }) => (__jsx(\\"Привет {v1}-кун!1\\", [{ type: \\"div\\", props: { className: \`host\` } }, username]));
+export const ClickHere = ({ username }) => (__jsx(\\"Привет&nbsp;{v1}, нажми <a2>здесь</a2> чтобы продолжить.\\", [{ type: \\"div\\", props: null }, username, { type: \\"a\\", props: { href: \\"#\\" } }]));
 export const Input = ({ hint, mode, descr }) => (<div className={\`input \${mode}\`}>
 		
-		<input placeholder={__(\\"Подсказка: <#1>\\", [hint])}/>
+		<input placeholder={__(\\"Подсказка: {v1}\\", [hint])}/>
 		<button value={__(\\"Войти\\")}/>
 		{descr}
 	</div>);
-export const InputWithText = ({ hint, mode }) => (__.jsx(\\"Представьтесь: <1/><2/>\\", [{ type: \\"div\\", props: { className: \`input \${mode}\` } }, { type: \\"input\\", props: { placeholder: __(\\"Подсказка: <#1>\\", [hint]) } }, { type: \\"button\\", props: { value: __(\\"Войти\\") } }]));
+export const InputWithText = ({ hint, mode }) => (__jsx(\\"Представьтесь: <input1/><button2/>\\", [{ type: \\"div\\", props: { className: \`input \${mode}\` } }, { type: \\"input\\", props: { placeholder: __(\\"Подсказка: {v1}\\", [hint]) } }, { type: \\"button\\", props: { value: __(\\"Войти\\") } }]));
 export const Fragment = () => (<div>
 		<>{__(\\"Простой текст\\")}</>
-		{__.jsx(\\"Фрагмент и <1/>\\", [{ type: React.Fragment }, { type: \\"i\\", props: null }])}
+		{__jsx(\\"Фрагмент и <i1/>\\", [{ type: React.Fragment }, { type: \\"i\\", props: null }])}
 	</div>);
 "
 `;
 
 exports[`transform react-composite 1`] = `
-"import __ from \\"tx-i18n\\";
+"import __jsx from \\"tx-i18n/jsx\\";
+import __ from \\"tx-i18n/text\\";
 import * as React from 'react';
 import { Hello } from './react';
 export const DeepHello = (props) => {
-    return __.jsx(\\"<1/> или Нет!\\", [{ type: \\"div\\", props: null }, { type: Hello, props: { ...props } }]);
+    return __jsx(\\"<Hello1/> или Нет!\\", [{ type: \\"div\\", props: null }, { type: Hello, props: { ...props } }]);
 };
 export const Button = ({ name, text, hint, primary }) => {
     return <button name={name} value={text} title={hint} type={primary ? __('submit') : __('button')}/>;
@@ -240,28 +248,25 @@ export class Dialog extends React.Component {
         const { props } = this;
         const text = __(\\"Тест \\\\\\"фу\\\\\\" бар\\");
         return (<div className=\\"host\\">
-				{__.jsx(\\"Заголовок <1/> да её и мультилайн, да-да.\\", [{ type: \\"h1\\", props: null }, { type: \\"i\\", props: null }])}
+				{__jsx(\\"Заголовок <i1/> да её и мультилайн, да-да.\\", [{ type: \\"h1\\", props: null }, { type: \\"i\\", props: null }])}
 				<h3>{text}</h3>
 
 				<Form controls={<div title={__(\\"Подвал\\")}>
-						<Button name={__(\\"submit\\")} text={__(\\"Хорошо\\")} hint={__(\\"Подсказка: <#1>!\\", [123])}/>
+						<Button name={__(\\"submit\\")} text={__(\\"Хорошо\\")} hint={__(\\"Подсказка: {v1}!\\", [123])}/>
 						<button value={__(\\"Отмена\\")} data-id={\`рав-текст\`}/>
 					</div>}>
 					<h2>{__(\` Ох, а вот ещё один мультилайн заголовок. \`)}</h2>
 					
 					<fieldset>
-						<div className=\\"row\\">
+						<div data-key=\\"props\\" className=\\"row\\">
 							<div className=\\"col\\">{__(\\"Ширина:\\", [], \\"form\\")}</div>
 							<div className=\\"col\\">123px</div>
 						</div>
-						<div className=\\"row\\">
-							{__.jsx(\\"Да<#1><2/>\\", [{ type: \\"div\\", props: { className: \\"col\\" } }, ' ', { type: \\"input\\", props: { type: \\"checked\\", checked: true } }], \\"form\\")}
+						<div data-key=\\"cbx\\" className=\\"row\\">
+							{__jsx(\\"Да{v1}<input2/>\\", [{ type: \\"div\\", props: { className: \\"col\\" } }, ' ', { type: \\"input\\", props: { type: \\"checked\\", checked: true } }], \\"form\\")}
 						</div>
-						<div>
-							{this.innerRender({ ...props, value: __('Тест', [], \\"form\\") })}
-							Окей
-						</div>
-						{__.jsx(\\"<1/>или<2/>\\", [{ type: \\"p\\", props: null }, { type: \\"button\\", props: { value: __(\\"Отмена\\", [], \\"form\\") } }, { type: Button, props: { name: (), text: (), primary: true } }], \\"form\\")}
+						{__jsx(\\"{v1} Окей\\", [{ type: \\"div\\", props: { \\"data-key\\": \\"inner\\" } }, this.innerRender({ ...props, value: __('Тест', [], \\"form\\") })], \\"form\\")}
+						{__jsx(\\"<button1/>или<Button2/>\\", [{ type: \\"p\\", props: { \\"data-key\\": \\"footer\\" } }, { type: \\"button\\", props: { value: __(\\"Отмена\\", [], \\"form\\") } }, { type: Button, props: { name: (), text: (), primary: true } }], \\"form\\")}
 					</fieldset>
 				</Form>
 			</div>);
@@ -271,7 +276,7 @@ export class Dialog extends React.Component {
 `;
 
 exports[`transform react-fragments 1`] = `
-"import __ from \\"tx-i18n\\";
+"import __ from \\"tx-i18n/text\\";
 import * as React from 'react';
 export const en = <>{__(\\"Check\\")}</>;
 export const ru = <>{__(\\"Проверочка\\")}</>;

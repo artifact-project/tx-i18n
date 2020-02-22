@@ -6,7 +6,7 @@ exports[`''; 1`] = `
 `;
 
 exports[`func 1`] = `
-"import __ from \\"tx-i18n\\";
+"import __ from \\"tx-i18n/text\\";
 console.log(__('Single \\"quote\\"'));
 console.log(__(\\"Double \\\\\\"quote\\\\\\"\\"));
 console.log(__(\`Mixed \\\\\\"quote\\\\'\`));
@@ -24,7 +24,7 @@ exports[`numbers 1`] = `
 `;
 
 exports[`object 1`] = `
-"import __ from \\"tx-i18n\\";
+"import __ from \\"tx-i18n/text\\";
 const short = false;
 const obj = {
     short,
@@ -43,21 +43,34 @@ obj[\`property: \${321}\`] = __(\`wow\`);
 "
 `;
 
+exports[`plural 1`] = `
+"import __ from \\"tx-i18n/text\\";
+import { plural } from '../../../icu/plural/en';
+console.log(__(\\"You have {v1, plural, one {# message} other {# messages}}.\\", [{ $: plural, _: 5 }]));
+console.log(__(\\"{v1, plural, one {# message} other {# messages}}\\", [{ $: plural, _: 0 }]));
+export function pluralMessages(num) {
+    return __(\\"{v1, plural, one {message} other {messages}}\\", [{ $: plural, _: num }]);
+}
+"
+`;
+
 exports[`simple 1`] = `
-"import __ from \\"tx-i18n\\";
+"import __ from \\"tx-i18n/text\\";
 __('foo');
 __('бар');
 "
 `;
 
 exports[`template 1`] = `
-"import __ from \\"tx-i18n\\";
+"import __ from \\"tx-i18n/text\\";
 __(\`simple\`);
-\`\${__('str')}\`;
-__(\\"before: <#1>\\", [1]);
-__(\\"<#1>: after\\", [2]);
-__(\\"<#1> middle <#2>\\", [__('before'), 4]);
-__(\\"foo <#1> baz\\", [__('бар')]);
-__(\\"<#1> шесть <#2> восемь\\", [5, 7]);
+\`\${123}\`;
+__(\\"ss\\\\\\"ttt\\\\\\"rr\\");
+__(\\"before: {v1}\\", [1]);
+__(\\"{v1}: after\\", [2]);
+__(\\"before middle {v2}\\", [4]);
+__(\\"foo бар baz\\");
+__(\\"{v1} шесть {v2} восемь\\", [5, 7]);
+__(\\"with '{' --{v1}-- '}' expr\\", [90]);
 "
 `;

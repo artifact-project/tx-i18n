@@ -25,6 +25,15 @@ it('template', () => {
 	expect(transform('template')).toMatchSnapshot();
 });
 
+it('plural', () => {
+	expect(transform('plural')).toMatchSnapshot();
+	expect(getPhrases().default.map(v => v.value)).toEqual([
+		'You have {v1, plural, one {# message} other {# messages}}.',
+		'{v1, plural, one {# message} other {# messages}}',
+		'{v1, plural, one {message} other {messages}}',
+	]);
+});
+
 it('func', () => {
 	expect(transform('func')).toMatchSnapshot();
 	// expect(getPhrases().default[0].value).toEqual('Single "quote"')

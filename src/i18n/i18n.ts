@@ -1,31 +1,12 @@
-import { createElement } from 'react';
+import { textCompile } from './i18n.compiler';
+import { getTranslate, getLang, getPlural } from './locale';
 
-import { createCompiler } from './compiler';
-import { jsxFactory } from '../jsx/jsx';
-import { getTranslate, getLang } from './locale';
+export function i18n(phrase: string, parts: any[], ctx: string = 'default'): string {
+	const lang = getLang();
+	const plural = getPlural();
+	const translatePhrase = getTranslate(phrase, lang, ctx);
+	const compiledPhrase = textCompile(translatePhrase, plural);
 
-const compile = createCompiler({
-	inject: null,
-	partOffset: -1,
-	before: () => '',
-	after: () => '""',
-	text: (text) => `${text}+`,
-	value: (part) => `${part}+`,
-});
-
-function i18n(phrase: string, parts: any[], ctx: string = 'default') {
-	const translatePhrase = getTranslate(phrase, getLang(), ctx);
-	const compiledPhrase = compile(translatePhrase);
-
+	// console.log(phrase, parts)
 	return compiledPhrase(parts);
 }
-
-i18n['jsx'] = jsxFactory(createElement);
-
-export default i18n as {
-	(pharse: string, parts?: any[]): string;
-	jsx: {
-		(pharse: string, parts: any[]): any;
-		useWrapper: (Cmp: Function) => void;
-	};
-};

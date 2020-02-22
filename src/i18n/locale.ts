@@ -1,9 +1,16 @@
+import { Plural } from '@artifact-project/i18n';
+
 let LANG = 'default';
 
 const LOCALES = {
 	[LANG]: {},
 } as {
 	[lang:string]: ContextedLocale;
+};
+const PLURAL = {
+	[LANG]: {},
+} as {
+	[lang:string]: Plural<any, any>;
 };
 
 export type LangObserver = (newLang: string, oldLang: string) => void;
@@ -28,30 +35,39 @@ export function addLangObserver(fn: LangObserver) {
 	};
 }
 
-export function setLang(name: string) {
-	if (LANG !== name) {
+export function setLang(code: string) {
+	if (LANG !== code) {
 		const old = LANG;
-		LANG = name;
+		LANG = code;
 		observers.forEach(fn => {
 			fn(LANG, old);
 		});
 	}
 }
 
-export function getLang(): string {
+export function getLang() {
 	return LANG;
+}
+
+export function getPlural() {
+	return PLURAL[LANG];
 }
 
 export function getLocale(lang: string): ContextedLocale {
 	return LOCALES[lang];
 }
 
-export function setLocale(lang: 'default' | string, locale: ContextedLocale) {
+export function setLocale<C extends string>(
+	lang: 'default' | C,
+	locale: ContextedLocale,
+	plural: Plural<C, any>,
+) {
 	LOCALES[lang] = locale;
+	PLURAL[lang] = plural;
 }
 
-export function setDefaultLocale(locale: ContextedLocale) {
-	setLocale('default', locale);
+export function setDefaultLocale(locale: ContextedLocale, plural: Plural<any, any>) {
+	setLocale('default', locale, plural);
 }
 
 export function getTranslate(phrase: string, lang = LANG, ctx: string = 'default'): string {

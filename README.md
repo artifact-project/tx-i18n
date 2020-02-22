@@ -10,6 +10,7 @@ npm i --save-dev tx-i18n
 
 ### Feature
 
+- [ICU Message Format](http://userguide.icu-project.org/formatparse/messages)
 - No additional markup (Just [compare](./COMPARE.md) with [react-intl](https://github.com/yahoo/react-intl) or [react-i18next](https://github.com/i18next/react-i18next))
 - Fastest (see [benchmarks](./__bench__/))
 - [Context](#context)
@@ -196,54 +197,14 @@ addDecorator(withTXI18n);
 
 
 ```jsx
-import { plural } from 'tx-i18n';
+import { plural } from 'tx-i18n/plural/en';
 
 const Hello = ({name, unreadCount}) => (
 	<div>
-		Hello <b>{name}</b>, you have <a href="#unread">{unreadCount} {plural('messages', unreadCount)}</a>.
+		Hello <b>{name}</b>!<br/>
+		You have <a href="#unread">{plural(unreadCount, {one: '# message', other: '# messages'})}</a>.
 	</div>
 );
-```
-
-##### `./src/locale/__plural__.ts`
-
-```ts
-import { PluralRules, PluralKeys } from 'tx-i18n/plural';
-
-export default {
-	default: {
-		messages: true,
-	},
-};
-
-export type PluralLocale<PR extends PluralRules, PK extends PluralKeys> = {
-	[CONTEXT in keyof PK]: {
-		[KEY in keyof PK[CONTEXT]]: {
-			[TYPE in keyof PR]: {
-				[CATEGORY in keyof PR[TYPE]]: string;
-			};
-		};
-	};
-};
-```
-
-##### `./src/locale/ru_RU.plural.ts`
-
-```ts
-import { setPlural } from 'tx-i18n';
-import ruLules from 'tx-i18n/plural/rules/ru';
-import pluralKeys from './__plural__';
-
-setPlural('ru_RU', ruLules, pluralKeys, {
-	default: {
-		messages: {
-			one: 'сообщение',
-			few: 'сообщения',
-			many: 'сообщений',
-			other: 'сообщения',
-		},
-	},
-});
 ```
 
 ---
