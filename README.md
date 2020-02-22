@@ -39,8 +39,8 @@ npm i --save-dev ttypescript
 {
   "compilerOptions": {
     "plugins": [{
-	  "transform": "tx-i18n/plugin",
-	  "humanTextCheckRegExp": "[а-яё]",
+      "transform": "tx-i18n/plugin",
+      "humanTextCheckRegExp": "[а-яё]",
       "output": "./src/locale/default.ts"
     }]
   },
