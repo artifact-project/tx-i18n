@@ -1,6 +1,12 @@
 import { writeFileSync } from 'fs';
 import { Program } from 'typescript';
-import transformerFactory, { TXConfig, getPhrases, ContextedPhrases, contextedPhrasesFilter, Phrase } from './src/transformer/transformer';
+import transformerFactory, {
+	TXConfig,
+	getPhrases,
+	ContextedPhrases,
+	contextedPhrasesFilter,
+	Phrase,
+} from './src/transformer/transformer';
 import { phrasesStringify, StringifySeparateOutput } from './src/utils/stringify';
 
 type MultipleOutput = {
@@ -11,8 +17,9 @@ type MultipleOutput = {
 type PluginOptions = Pick<TXConfig,
 	| 'exclude'
 	| 'include'
-	| 'fnName'
 	| 'packageName'
+	| 'jsxFnName'
+	| 'textFnName'
 > & {
 	humanTextCheckRegExp?: string;
 	verbose?: boolean;
