@@ -11,7 +11,7 @@
     "test-plugin": "ttsc",
     "build": "tsc",
     "clean": "git clean -f",
-    "prepublish": "npm run test && npm run build",
+    "prepublishOnly": "npm run test && npm run build",
     "postpublish": "npm run clean"
   },
   "devDependencies": {
@@ -29,8 +29,8 @@
     "react-test-renderer": "^16.4.2",
     "ts-jest": "^20.0.4",
     "ts-node": "^8.5.4",
-    "ttypescript": "^1.5.8",
-    "typescript": "^3.7.3",
+    "ttypescript": "^1.5.10",
+    "typescript": "^3.8.3",
     "webpack": "^4.41.3"
   },
   "peerDependencies": {
