@@ -14,17 +14,6 @@
     "prepublish": "npm run test && npm run build",
     "postpublish": "npm run clean"
   },
-  "files": [
-    "*.js",
-    "*.d.ts",
-    "*.js.map",
-    "src/*/*.js",
-    "src/*/*.d.ts",
-    "src/*/*.js.map",
-    "storybook-addon/*.js",
-    "storybook-addon/*.d.ts",
-    "storybook-addon/*.js.map"
-  ],
   "devDependencies": {
     "@storybook/addons": "^5.2.8",
     "@storybook/api": "^5.2.8",

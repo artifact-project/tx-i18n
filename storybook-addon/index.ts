@@ -1,8 +1,9 @@
 import { createElement, useEffect, useReducer } from 'react';
 import addons, { makeDecorator, StoryContext, StoryGetter } from '@storybook/addons';
 import { ADDON_EVENT_SET, ADDON_EVENT_REGISTER } from './shared';
-import { setLang, getLang, setLocale, ContextedLocale } from '../src/i18n/locale';
+import { setLang, setLocale, ContextedLocale } from '../src/i18n/locale';
 import { Channel } from '@storybook/channels';
+import { plural } from '../icu/plural/ru';
 
 export const withTXI18n = makeDecorator({
 	name: 'tx-i18n',
@@ -34,7 +35,7 @@ function TXI18NProvider(props: TXI18NProviderProps) {
 
 	useEffect(() => {
 		Object.entries(locales).forEach(([lang, locale]) => {
-			setLocale(lang, locale);
+			setLocale(lang, locale, plural);
 		});
 
 		const handle = (val: string) => {
