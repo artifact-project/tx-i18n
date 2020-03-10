@@ -1,7 +1,15 @@
 {
   "name": "tx-i18n",
-  "version": "0.6.0-rc.7",
-  "description": "Auto-translate for your application (TSX/React supported)",
+  "version": "1.0.0-beta.1",
+  "description": "Auto-translate for your application (ICU, pluralization, TSX/React supported)",
+  "keywords": [
+    "i18n",
+    "internationalization",
+    "pluralization",
+    "icu",
+    "jsx",
+    "react"
+  ],
   "author": "RubaXa <ibn@rubaxa.org>",
   "license": "MIT",
   "repository": "git@github.com:artifact-project/tx-i18n.git",

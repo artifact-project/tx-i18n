@@ -98,9 +98,10 @@ module.exports = {
 
 ```ts
 import { setLang, setLocale } from 'tx-i18n';
+import { plural } from 'tx-i18n/plural/en';
 import locale from './locale/en';
 
-setLocale('en', locale);
+setLocale('en', locale, plural);
 setLang('en');
 ```
 
@@ -328,7 +329,7 @@ const text = `Hi, ${username}!`;
 
 // Transformed (after bundle build)
 import __ from 'tx-i18n';
-const text = __('Hi, <#1>!', [username]);
+const text = __('Hi, {v1}!', [username]);
 ```
 
 #### TSX / React
