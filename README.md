@@ -1,5 +1,5 @@
-🈂️tx-i18n
--------
+🈂️ tx-i18n
+----------
 Auto-translate for your application (TSX/React supported)
 
 ```sh
