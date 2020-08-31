@@ -13,9 +13,9 @@ it('jsx', () => {
 		`Привет {v1}, нажми <a2>здесь</a2> чтобы продолжить<i3/>.`,
 		[
 			{type: 'div', props: null},
-			"Вася",
-			{type: "a", props: {href: "#"}},
-			{type: "i", props: {className: "icon"}},
+			'Вася',
+			{type: 'a', props: {href: '#'}},
+			{type: 'i', props: {className: 'icon'}},
 		]
 	)).toMatchSnapshot();
 });

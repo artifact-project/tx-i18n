@@ -1,18 +1,14 @@
 import { Plural } from '@artifact-project/i18n';
 import { icu, Token } from '../utils/icu';
-import { AST } from 'format-message-parse';
+import { AST, Element } from 'format-message-parse';
 import { htmlDecode } from '../utils/entities';
-import { compileTokens } from '../i18n/i18n.compiler';
-
-const stringify = JSON.stringify;
-const R_CLEANER = /,\s*(\)\))/g;
+import { InterpolateString, createInterpolateString, initInterpolateString } from '../i18n/i18n.compiler';
 
 const EMPTY_ARRAY = [];
 const EMPTY_STRING = '';
 const HASH_BANG = '#';
-const EQUAL = '=';
 
-const COMPILED = {};
+const COMPILED = {} as Record<string, (parts: any[]) => LikeJSXElement>;
 
 export type LikeJSXElement = {
 	type: string | Function;
@@ -33,7 +29,15 @@ export function jsxCompile(
 		return COMPILED[phrase];
 	}
 
-	const source = [] as string[];
+	const icuTools = icu.fn({ plural });
+	const tokenCache = new Map<Element, {
+		type: Token;
+		idx: number | null;
+		raw?: string;
+		plural: InterpolateString | null;
+	}>()
+	
+
 	let tokens = [] as AST;
 	let compiled = null;
 
@@ -46,86 +50,85 @@ export function jsxCompile(
 		console.error(err);
 	}
 
-	function write(code: string) {
-		source.push(code);
-	}
-
 	// Tokens processing
 	// console.log(tokens);
-	(function processing(tokens: AST, idx: number) {
-		write(`($$$ = __vls__[${idx}], __CREATE__($$$.type, $$$.props`);
+	function processing(values: any, tokens: AST, idx: number) {
+		const el = values[idx];
+		const args = [el.type, el.props];
+		// write(`($$$ = __vls__[${idx}], __CREATE__($$$.type, $$$.props`);
 
 		for (let i = 0; i < tokens.length; i++) {
 			const token = tokens[i];
+			const cache = tokenCache.get(token) || {
+				type: icu.getTokenType(token),
+				idx: null,
+				plural: null,
+			};
 
-			switch (icu.getTokenType(token)) {
+			switch (cache.type) {
 				case Token.String:
 					if (token !== EMPTY_STRING) {
-						write(`,\n${stringify(htmlDecode(token as string))}`);
+						const raw = cache.raw || htmlDecode(token as string);
+						cache.raw = raw;
+						args.push(raw);
 					}
 					break;
 
 				case Token.Simple:
-					if (token[0] === HASH_BANG) {
-						write(`,\n__vls__[${idx}]._`);
-					} else {
-						idx = icu.parseTokenIdx(token, 0);
-						write(`,\n__vls__[${idx}]`);
-					}
+					idx = cache.idx === null ? icu.parseTokenIdx(token, 0) : cache.idx;
+					cache.idx = idx;
+					args.push(token[0] === HASH_BANG ? values[idx]._ : values[idx]);
 					break;
 
 				case Token.Tag:
-					idx = icu.parseTokenIdx(token, 0);
-					write(`,\n`);
+					idx = cache.idx === null ? icu.parseTokenIdx(token, 0) : cache.idx;
+					cache.idx = idx;
+
 					if (token.length === 3) {
-						processing((token[2] as any).children, idx);
+						args.push(processing(values, (token[2] as any).children, idx));
 					} else {
-						processing(EMPTY_ARRAY, idx);
+						args.push(processing(values, EMPTY_ARRAY, idx));
 					}
 					break;
 
 				case Token.Typed:
-					throw "todo: Token.Typed";
-					break;
+					throw new Error("todo: Token.Typed");
 
 				case Token.Styled:
-					// idx = icu.parseTokenIdx(token);
-					// write(`+ __ICUFN__.select(__vls__[${idx}], {`);
-
-					// Object.keys(token[2]).forEach((key) => {
-					// 	write(`${stringify(key)}: (`);
-					// 	processing(token[2][key], idx);
-					// 	write(`),\n`);
-					// });
-
-					// write(`})`);
-					break;
+					throw new Error("todo: Token.Typed");
 
 				case Token.Plural:
-					write(`, ${compileTokens([token], 0).join('')}`);
+					if (cache.plural === null) {
+						cache.plural = createInterpolateString(icuTools);
+						initInterpolateString(cache.plural, [token], 0);
+					}
+
+					cache.plural.value = null;
+					cache.plural.values = values;
+
+					args.push(cache.plural.toString());
 					break;
 			}
-		}
-		write('))');
-	})(tokens, 0);
 
-	const code = `return function (__vls__) {
-		var $$$;
-		return (${ source.join('') });
-	};`.trim();
+			tokenCache.set(token, cache);
+		}
+
+		return args.length === 2
+			? createElement(el.type, el.props)
+			: args.length === 2
+			? createElement(el.type, el.props. args[2])
+			: createElement.apply(null, args)
+	}
 
 	// Compile
 	// console.log(code);
 	try {
-		compiled = Function(`__CREATE__, __ICUFN__`, code)(
-			createElement,
-			icu.fn({
-				plural,
-			}),
-		);
+		compiled = function (values: any) {
+			return processing(values, tokens, 0)
+		}
 	} catch (err) {
 		compiled = () => phrase;
-		console.warn(`Parse failed: "${phrase}"\n-----------\n${code}`);
+		console.warn(`Parse failed: "${phrase}"`);
 		console.error(err);
 	}
 
