@@ -1,5 +1,6 @@
 import { plural } from '../../icu/plural/en';
 import { i18n } from './i18n';
+import { SubMessages } from '@artifact-project/i18n';
 
 describe('i18n', () => {
 	it('ICU simple message', () => {
@@ -42,11 +43,9 @@ describe('i18n', () => {
 	});
 });
 
-
-
 function select<
-	T extends any,
-	S extends ({ [K in T]?: any; } & { other: any }),
->(value: T, sub: S): S[T] {
+	V extends string,
+	SM extends SubMessages<V>
+>(value: V, sub: SM) {
 	return sub.hasOwnProperty(value) ? sub[value] : sub.other;
 }

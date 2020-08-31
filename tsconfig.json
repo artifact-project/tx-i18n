@@ -32,6 +32,7 @@
   "include": [
     "*.ts",
     "./src/",
+    "./icu/",
     "./storybook-addon/"
   ]
 }
