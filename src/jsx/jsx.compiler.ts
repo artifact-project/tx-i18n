@@ -92,10 +92,10 @@ export function jsxCompile(
 					break;
 
 				case Token.Typed:
-					throw new Error("todo: Token.Typed");
+					throw new Error('todo: Token.Typed');
 
 				case Token.Styled:
-					throw new Error("todo: Token.Typed");
+					throw new Error('todo: Token.Styled');
 
 				case Token.Plural:
 					if (cache.plural === null) {
@@ -115,7 +115,7 @@ export function jsxCompile(
 
 		return args.length === 2
 			? createElement(el.type, el.props)
-			: args.length === 2
+			: args.length === 3
 			? createElement(el.type, el.props. args[2])
 			: createElement.apply(null, args)
 	}

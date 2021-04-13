@@ -1,6 +1,6 @@
 {
   "name": "tx-i18n",
-  "version": "1.0.0-beta.1",
+  "version": "1.0.0-beta.2",
   "description": "Auto-translate for your application (ICU, pluralization, TSX/React supported)",
   "keywords": [
     "i18n",
@@ -15,11 +15,11 @@
   "repository": "git@github.com:artifact-project/tx-i18n.git",
   "main": "index.js",
   "scripts": {
-    "test": "jest --coverage",
+    "test": "jest",
     "test-plugin": "ttsc",
     "build": "tsc",
     "clean": "git clean -f",
-    "prepublishOnly": "npm run test && npm run build",
+    "prepublishOnly": "npm test -- --coverage && npm run build",
     "postpublish": "npm run clean"
   },
   "devDependencies": {
