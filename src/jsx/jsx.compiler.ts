@@ -35,8 +35,7 @@ export function jsxCompile(
 		idx: number | null;
 		raw?: string;
 		plural: InterpolateString | null;
-	}>()
-	
+	}>();
 
 	let tokens = [] as AST;
 	let compiled = null;
@@ -55,7 +54,6 @@ export function jsxCompile(
 	function processing(values: any, tokens: AST, idx: number) {
 		const el = values[idx];
 		const args = [el.type, el.props];
-		// write(`($$$ = __vls__[${idx}], __CREATE__($$$.type, $$$.props`);
 
 		for (let i = 0; i < tokens.length; i++) {
 			const token = tokens[i];
@@ -113,19 +111,18 @@ export function jsxCompile(
 			tokenCache.set(token, cache);
 		}
 
-		return args.length === 2
+		const argn = args.length;
+
+		return argn === 3
+			? createElement(el.type, el.props, args[2])
+			: argn === 2
 			? createElement(el.type, el.props)
-			: args.length === 3
-			? createElement(el.type, el.props. args[2])
 			: createElement.apply(null, args)
 	}
 
 	// Compile
-	// console.log(code);
 	try {
-		compiled = function (values: any) {
-			return processing(values, tokens, 0)
-		}
+		compiled = (values: any) => processing(values, tokens, 0);
 	} catch (err) {
 		compiled = () => phrase;
 		console.warn(`Parse failed: "${phrase}"`);
