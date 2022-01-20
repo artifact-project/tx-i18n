@@ -34,7 +34,7 @@ export const icu = {
 	},
 
 	quote(val: string) {
-		return val ? val.replace(R_ICU_ESCAPE, `'$&'`) : val;
+		return val ? val.replace(R_ICU_ESCAPE, `'$&`) : val;
 	},
 
 	getTokenType(token: Element): Token {

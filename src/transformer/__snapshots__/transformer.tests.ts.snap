@@ -13,6 +13,14 @@ console.log(__(\`Mixed \\\\\\"quote\\\\'\`));
 "
 `;
 
+exports[`like mustache vars 1`] = `
+"import __ from \\"tx-i18n/text\\";
+console.log(__('Single \\\\'{quote\\\\'}'));
+console.log(__(\\"Double '{quote'}\\"));
+console.log(__(\`Litteral '{quote'}\`));
+"
+`;
+
 exports[`numbers 1`] = `
 "'1';
 '2px';
@@ -71,6 +79,6 @@ __(\\"{v1}: after\\", [2]);
 __(\\"before middle {v2}\\", [4]);
 __(\\"foo бар baz\\");
 __(\\"{v1} шесть {v2} восемь\\", [5, 7]);
-__(\\"with '{' --{v1}-- '}' expr\\", [90]);
+__(\\"with '{ --{v1}-- '} expr\\", [90]);
 "
 `;

@@ -27,6 +27,7 @@ interface Config {
 
 const R_IS_TAG = /^[a-z0-9:]+$/;
 const stringify = JSON.stringify;
+const SINGLE_QUOTE_CODE = `'`.charCodeAt(0);
 
 function log(obj: object | string | number | boolean, ind = '', max = 3) {
 	if (obj == null || /number|string|boolean/.test(typeof obj)) {
@@ -223,7 +224,13 @@ function wrapStringLiteral(node: ts.Node, cfg: Config, decode?: boolean) {
 		return visited(node);
 	}
 
-	let text = normalizeText(cfg, icu.quote(node.getText()));
+	let quotedText = icu.quote(node.getText());
+	
+	if (quotedText.charCodeAt(0) === SINGLE_QUOTE_CODE) {
+		quotedText = `'${quotedText.slice(1, -1).replace(/'/g, `\\'`)}'`;
+	}
+
+	let text = normalizeText(cfg, quotedText);
 
 	if (!cfg.isHumanText(text, node)) {
 		return visited(node);

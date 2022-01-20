@@ -41,6 +41,13 @@ it('func', () => {
 	// expect(getPhrases().default[2].value).toEqual('Mixed \"quote\"');
 });
 
+it('like mustache vars', () => {
+	expect(transform('like-mustache-vars')).toMatchSnapshot();
+	// expect(getPhrases().default[0].value).toEqual('Single "quote"')
+	// expect(getPhrases().default[1].value).toEqual('Double \"quote\"');
+	// expect(getPhrases().default[2].value).toEqual('Mixed \"quote\"');
+});
+
 it('phrases', () => {
 	transform('simple')
 

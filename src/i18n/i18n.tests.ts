@@ -8,6 +8,10 @@ describe('i18n', () => {
 		expect(i18n('Hi, {v1}!', ['i18n'])).toBe('Hi, i18n!');
 	});
 
+	it('ICU quote', () => {
+		expect(i18n(`Hi '{username}'!`, [])).toBe('Hi {username}!');
+	});
+
 	it('ICU plural', () => {
 		const msg = `You have {v1, plural,
 			one {# message}
