@@ -53,6 +53,14 @@ export function getPlural() {
 	return PLURAL[LANG];
 }
 
+export function setPlural<C extends string>(lang: C, plural: Plural<C, any>) {
+	return PLURAL[lang] = plural;
+}
+
+export function setDefaultPlural(plural: Plural<any, any>) {
+	setPlural('default', plural);
+}
+
 export function getLocale(lang: string): ContextedLocale {
 	return LOCALES[lang];
 }
@@ -63,7 +71,7 @@ export function setLocale<C extends string>(
 	plural: Plural<C, any>,
 ) {
 	LOCALES[lang] = locale;
-	PLURAL[lang] = plural;
+	setPlural(lang, plural);
 }
 
 export function setDefaultLocale(locale: ContextedLocale, plural: Plural<any, any>) {

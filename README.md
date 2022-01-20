@@ -98,7 +98,7 @@ module.exports = {
 
 ```ts
 import { setLang, setLocale } from 'tx-i18n';
-import { plural } from 'tx-i18n/plural/en';
+import { plural } from 'tx-i18n/icu/plural/en';
 import locale from './locale/en';
 
 setLocale('en', locale, plural);
