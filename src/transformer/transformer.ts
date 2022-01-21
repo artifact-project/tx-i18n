@@ -219,30 +219,33 @@ function hasJsxTextChildren(node: ts.JsxElement | ts.JsxFragment, cfg: Config) {
 	});
 }
 
-function wrapStringLiteral(node: ts.Node, cfg: Config, decode?: boolean) {
-	if (!ts.isStringLiteralLike(node)) {
+function wrapStringLiteral(node: ts.Node | undefined, cfg: Config, decode?: boolean) {
+	if (!node || !ts.isStringLiteralLike(node)) {
 		return visited(node);
 	}
 
-	let quotedText = icu.quote(node.getText());
+	let nodeText = node.getText();
+	let isSingleQuote = nodeText.charCodeAt(0) === SINGLE_QUOTE_CODE;
+	if (isSingleQuote) {
+		nodeText = stringify(node.text);
+	}
+
+	let quotedText = icu.quote(nodeText);
+	let normText = normalizeText(cfg, quotedText);
 	
-	if (quotedText.charCodeAt(0) === SINGLE_QUOTE_CODE) {
-		quotedText = `'${quotedText.slice(1, -1).replace(/'/g, `\\'`)}'`;
-	}
+	// console.log([nodeText, quotedText, node.text])
 
-	let text = normalizeText(cfg, quotedText);
-
-	if (!cfg.isHumanText(text, node)) {
+	if (!cfg.isHumanText(normText, node)) {
 		return visited(node);
 	}
 
-	savePhrase(text.slice(1, -1), node, cfg);
+	savePhrase(normText.slice(1, -1), node, cfg);
 
 	if (decode) {
-		text = decodeEntities(text);
+		normText = decodeEntities(normText);
 	}
 
-	return i18nWrap(cfg, 'text', [ts.createIdentifier(text)]);
+	return i18nWrap(cfg, 'text', [ts.createIdentifier(normText)]);
 }
 
 const rICUFn = /^(plural|select)/i;
@@ -252,8 +255,11 @@ function parseICU(node: ts.Expression, idx: number) {
 		return null;
 	}
 
-	const len = node.getChildCount();
+	let len:number = 0;
 
+	try {
+		len = node.getChildCount();
+	} catch {}
 
 	if (len === 4) {
 		const children = node.getChildren();
@@ -381,7 +387,7 @@ function visitNode(
 		isHumanText,
 	} = cfg;
 
-	if (isVisited(node)) {
+	if (!node || isVisited(node)) {
 		return node;
 	}
 
@@ -604,9 +610,17 @@ function parseInlineConfig(node: ts.Node): InlineConfig {
 }
 
 function visitNodeAndChildren(node: ts.Node, context, cfg: Config, jsxInlineConfig: InlineConfig[] = []) {
+	if (!node) {
+		return node;
+	}
+
 	return ts.visitEachChild(
 		visitNode(node, context, cfg),
 		(childNode) => {
+			if (!childNode) {
+				return childNode;
+			}
+
 			let inlineCfg = parseInlineConfig(childNode);
 
 			if (!inlineCfg) {

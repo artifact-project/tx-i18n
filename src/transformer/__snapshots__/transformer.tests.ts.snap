@@ -7,7 +7,7 @@ exports[`''; 1`] = `
 
 exports[`func 1`] = `
 "import __ from \\"tx-i18n/text\\";
-console.log(__('Single \\"quote\\"'));
+console.log(__(\\"Single \\\\\\"quote\\\\\\"\\"));
 console.log(__(\\"Double \\\\\\"quote\\\\\\"\\"));
 console.log(__(\`Mixed \\\\\\"quote\\\\'\`));
 "
@@ -15,9 +15,9 @@ console.log(__(\`Mixed \\\\\\"quote\\\\'\`));
 
 exports[`like mustache vars 1`] = `
 "import __ from \\"tx-i18n/text\\";
-console.log(__('Single \\\\'{quote\\\\'}'));
-console.log(__(\\"Double '{quote'}\\"));
-console.log(__(\`Litteral '{quote'}\`));
+console.log(__(\\"Single '{'quote'}'\\"));
+console.log(__(\\"Double '{'quote'}'\\"));
+console.log(__(\`Litteral '{'quote'}'\`));
 "
 `;
 
@@ -36,17 +36,17 @@ exports[`object 1`] = `
 const short = false;
 const obj = {
     short,
-    foo: __('bar'),
-    'hello': __('world'),
-    'bar-qux': __('wow'),
-    [\`interpolated \${123}\`]: __('ok'),
+    foo: __(\\"bar\\"),
+    'hello': __(\\"world\\"),
+    'bar-qux': __(\\"wow\\"),
+    [\`interpolated \${123}\`]: __(\\"ok\\"),
 };
 const inArray = [
     {
-        value: __('Username'),
+        value: __(\\"Username\\"),
     },
 ];
-obj['property'] = __('yes');
+obj['property'] = __(\\"yes\\");
 obj[\`property: \${321}\`] = __(\`wow\`);
 "
 `;
@@ -64,8 +64,11 @@ export function pluralMessages(num) {
 
 exports[`simple 1`] = `
 "import __ from \\"tx-i18n/text\\";
-__('foo');
-__('бар');
+__(\\"foo\\");
+__(\\"бар\\");
+__(\\"[~!@#$%^&*_-+=\`|\\\\\\\\()'{''}'[]:;\\\\\\"'<>,.?/]\\");
+__(\\"[~!@#$%^&*_-+=\`|\\\\\\\\()'{''}'[]:;\\\\\\"'<>,.?/]\\");
+__(\\"Максимальное значение - $'{'max'}'\\");
 "
 `;
 
@@ -79,6 +82,6 @@ __(\\"{v1}: after\\", [2]);
 __(\\"before middle {v2}\\", [4]);
 __(\\"foo бар baz\\");
 __(\\"{v1} шесть {v2} восемь\\", [5, 7]);
-__(\\"with '{ --{v1}-- '} expr\\", [90]);
+__(\\"with '{' --{v1}-- '}' expr\\", [90]);
 "
 `;

@@ -9,7 +9,8 @@ describe('i18n', () => {
 	});
 
 	it('ICU quote', () => {
-		expect(i18n(`Hi '{username}'!`, [])).toBe('Hi {username}!');
+		expect(i18n(`Hi '{'username'}'!`, [])).toBe('Hi {username}!');
+		expect(i18n("Tpl $'{'name'}' vars", [])).toBe('Tpl ${name} vars');
 	});
 
 	it('ICU plural', () => {

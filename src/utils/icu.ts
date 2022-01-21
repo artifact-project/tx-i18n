@@ -33,8 +33,9 @@ export const icu = {
 		})
 	},
 
-	quote(val: string) {
-		return val ? val.replace(R_ICU_ESCAPE, `'$&`) : val;
+	quote(val: string, escaping?: string) {
+		const escape = `${escaping || ''}'`;
+		return val ? val.replace(R_ICU_ESCAPE, `${escape}$&${escape}`) : val;
 	},
 
 	getTokenType(token: Element): Token {

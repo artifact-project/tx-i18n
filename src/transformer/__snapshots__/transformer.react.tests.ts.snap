@@ -231,7 +231,7 @@ export const DeepHello = (props) => {
     return __jsx(\\"<Hello1/> или Нет!\\", [{ type: \\"div\\", props: null }, { type: Hello, props: { ...props } }]);
 };
 export const Button = ({ name, text, hint, primary }) => {
-    return <button name={name} value={text} title={hint} type={primary ? __('submit') : __('button')}/>;
+    return <button name={name} value={text} title={hint} type={primary ? __(\\"submit\\") : __(\\"button\\")}/>;
 };
 export const Form = (props) => {
     return (<form>
@@ -265,7 +265,7 @@ export class Dialog extends React.Component {
 						<div data-key=\\"cbx\\" className=\\"row\\">
 							{__jsx(\\"Да{v1}<input2/>\\", [{ type: \\"div\\", props: { className: \\"col\\" } }, ' ', { type: \\"input\\", props: { type: \\"checked\\", checked: true } }], \\"form\\")}
 						</div>
-						{__jsx(\\"{v1} Окей\\", [{ type: \\"div\\", props: { \\"data-key\\": \\"inner\\" } }, this.innerRender({ ...props, value: __('Тест', [], \\"form\\") })], \\"form\\")}
+						{__jsx(\\"{v1} Окей\\", [{ type: \\"div\\", props: { \\"data-key\\": \\"inner\\" } }, this.innerRender({ ...props, value: __(\\"Тест\\", [], \\"form\\") })], \\"form\\")}
 						{__jsx(\\"<button1/>или<Button2/>\\", [{ type: \\"p\\", props: { \\"data-key\\": \\"footer\\" } }, { type: \\"button\\", props: { value: __(\\"Отмена\\", [], \\"form\\") } }, { type: Button, props: { name: (), text: (), primary: true } }], \\"form\\")}
 					</fieldset>
 				</Form>

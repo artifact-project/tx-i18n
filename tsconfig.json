@@ -4,7 +4,7 @@
     "module": "commonjs",
     "target": "es5",
     "declaration": true,
-    "sourceMap": true,
+    "sourceMap": false,
     "moduleResolution": "node",
     "esModuleInterop": true,
     "experimentalDecorators": true,
