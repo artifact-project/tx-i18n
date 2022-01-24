@@ -1,10 +1,10 @@
 import { transform, reactLoad, reactRender } from './test-utils';
 import { setDefaultLocale } from '../i18n/locale';
 import { getPhrases } from './transformer';
-import { plural } from '../../icu/plural/en';
+import { enPlural } from '../../icu/plural/en';
 
 beforeEach(() => {
-	setDefaultLocale({}, plural as any);
+	setDefaultLocale({}, enPlural as any);
 })
 
 describe('transform', () => {
@@ -55,7 +55,7 @@ describe('render', () => {
 					'Привет {v1}-кун!1': 'Hi, {v1}-kun!',
 					'<Hello1/> или Нет!': '<Hello1/> or No!',
 				},
-			}, plural);
+			}, enPlural);
 			expect(reactRender(blocks.DeepHello, {username: 'i18n'})).toMatchSnapshot();
 		});
 
@@ -65,7 +65,7 @@ describe('render', () => {
 					'Привет {v1}-кун!1': '{v1}, HI!',
 					'<Hello1/> или Нет!': 'No or <Hello1/>!',
 				},
-			}, plural);
+			}, enPlural);
 			expect(reactRender(blocks.DeepHello, {username: 'i18n'})).toMatchSnapshot();
 		});
 
@@ -87,7 +87,7 @@ describe('render', () => {
 					'Да{v1}<input2/>': '<input2/> — YES',
 					'{v1} Окей': 'Okey {v1}',
 				},
-			}, plural);
+			}, enPlural);
 
 			expect(Object.keys(getPhrases())).toEqual(['default', 'form']);
 			// expect(getPhrases()).toEqual({});

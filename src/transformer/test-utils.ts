@@ -57,9 +57,9 @@ export function reactLoad(name: string): any {
 					return {default: i18nText};
 				} else if (name === 'tx-i18n/jsx') {
 					return {default: i18nJSX};
-				} else if (name.substr(0, 2) === './') {
+				} else if (name.slice(0, 2) === './') {
 					return reactLoad(name.substr(2));
-				} else if (name.substr(0, 2) === '..') {
+				} else if (name.slice(0, 2) === '..') {
 					return reactLoad(fixDir(name));
 				} else {
 					return require(name);

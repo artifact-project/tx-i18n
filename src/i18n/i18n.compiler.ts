@@ -10,7 +10,7 @@ const COMPILED = {} as Record<string, (parts: any[]) => string>;
 
 export function textCompile(
 	phrase: string,
-	plural?: Plural<any, any>,
+	plural?: Plural<any>,
 ): (parts: any[]) => string {
 	if (COMPILED.hasOwnProperty(phrase)) {
 		return COMPILED[phrase];

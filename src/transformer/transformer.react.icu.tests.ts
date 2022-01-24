@@ -1,14 +1,14 @@
 import { transform, reactLoad, reactRender } from './test-utils';
 import { setDefaultLocale, setLocale, setLang } from '../i18n/locale';
 import { getPhrases, resetPhrases } from './transformer';
-import { plural } from '../../icu/plural/en';
-import { plural as ruPlural } from '../../icu/plural/ru';
+import { enPlural } from '../../icu/plural/en';
+import { ruPlural } from '../../icu/plural/ru';
 
 
 beforeEach(() => {
 	setLang('default')
 	resetPhrases();
-	setDefaultLocale({}, plural as any);
+	setDefaultLocale({}, enPlural);
 })
 
 describe('react-icu', () => {

@@ -8,9 +8,9 @@ const LOCALES = {
 	[lang:string]: ContextedLocale;
 };
 const PLURAL = {
-	[LANG]: {},
+	[LANG]: null,
 } as {
-	[lang:string]: Plural<any, any>;
+	[lang:string]: Plural<any> | null;
 };
 
 export type LangObserver = (newLang: string, oldLang: string) => void;
@@ -37,10 +37,12 @@ export function addLangObserver(fn: LangObserver) {
 
 export function setLang(code: string) {
 	if (LANG !== code) {
-		const old = LANG;
+		const prev = LANG;
+		
 		LANG = code;
+
 		observers.forEach(fn => {
-			fn(LANG, old);
+			fn(LANG, prev);
 		});
 	}
 }
@@ -49,15 +51,15 @@ export function getLang() {
 	return LANG;
 }
 
-export function getPlural() {
+export function getPlural(): Plural<any> | null {
 	return PLURAL[LANG];
 }
 
-export function setPlural<C extends string>(lang: C, plural: Plural<C, any>) {
+export function setPlural<C extends string>(lang: C, plural: Plural<any>) {
 	return PLURAL[lang] = plural;
 }
 
-export function setDefaultPlural(plural: Plural<any, any>) {
+export function setDefaultPlural(plural: Plural<any>) {
 	setPlural('default', plural);
 }
 
@@ -68,13 +70,13 @@ export function getLocale(lang: string): ContextedLocale {
 export function setLocale<C extends string>(
 	lang: 'default' | C,
 	locale: ContextedLocale,
-	plural: Plural<C, any>,
+	plural: Plural<any>,
 ) {
 	LOCALES[lang] = locale;
 	setPlural(lang, plural);
 }
 
-export function setDefaultLocale(locale: ContextedLocale, plural: Plural<any, any>) {
+export function setDefaultLocale(locale: ContextedLocale, plural: Plural<any>) {
 	setLocale('default', locale, plural);
 }
 

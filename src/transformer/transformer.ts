@@ -248,7 +248,7 @@ function wrapStringLiteral(node: ts.Node | undefined, cfg: Config, decode?: bool
 	return i18nWrap(cfg, 'text', [ts.createIdentifier(normText)]);
 }
 
-const rICUFn = /^(plural|select)/i;
+const rICUFn = /^(plural|[a-z]+Plural|select)/i;
 
 function parseICU(node: ts.Expression, idx: number) {
 	if (node.end < 0 || node.pos < 0) {

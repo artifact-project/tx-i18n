@@ -3,6 +3,7 @@ import { icu, Token } from '../utils/icu';
 import { AST, Element } from 'format-message-parse';
 import { htmlDecode } from '../utils/entities';
 import { InterpolateString, createInterpolateString, initInterpolateString } from '../i18n/i18n.compiler';
+import { getPlural } from '../..';
 
 const EMPTY_ARRAY = [];
 const EMPTY_STRING = '';
@@ -23,7 +24,7 @@ export type LikeJSXFactory = (type: string | Function, props: object, ...childre
 export function jsxCompile(
 	phrase: string,
 	createElement: LikeJSXFactory,
-	plural?: Plural<any, any>,
+	plural: Plural<any> = getPlural(),
 ): (parts: any[]) => LikeJSXElement {
 	if (COMPILED.hasOwnProperty(phrase)) {
 		return COMPILED[phrase];

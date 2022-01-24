@@ -7,7 +7,7 @@ const R_NOT_NUMBER = /[^\d]+/g;
 const HTML_TAG_TYPE = 'HTML_TAG';
 
 export type ICUFuncStore = {
-	plural: Plural<string, any>;
+	plural: Plural<any>;
 	select?: (val: any, sub: object) => any;
 }
 
@@ -57,17 +57,13 @@ export const icu = {
 
 	fn: (store: ICUFuncStore) => ({
 		select(fn: ICUFuncCall<typeof store.select>, messages: object) {
-			if (fn == null) {
-				return 'icu:select:failed';
-			}
-			return (fn.$ || store.select)(fn._, messages);
+			const select = fn && (fn.$ || store.select);
+			return select ? select(fn._, messages) : 'icu:select:failed';
 		},
 
 		plural(fn: ICUFuncCall<typeof store.plural>, offset: number, messages: object) {
-			if (fn == null) {
-				return 'icu:plural:failed';
-			}
-			return (fn.$ || store.plural)(fn._ + offset, messages);
+			const plural = fn && (fn.$ || store.plural);
+			return plural ? plural(fn._ + offset, messages) : 'icu:plural:failed';
 		},
 	}),
 }

@@ -1,4 +1,4 @@
-import { plural } from '../../icu/plural/en';
+import { enPlural } from '../../icu/plural/en';
 import { i18n } from './i18n';
 import { SubMessages } from '@artifact-project/i18n';
 
@@ -20,8 +20,8 @@ describe('i18n', () => {
 			=0 {zero messages}
 		}.`;
 
-		expect(i18n(msg, [{ $: plural, _: 5 }])).toBe('You have 5 messages.');
-		expect(i18n(msg, [{ $: plural, _: 0 }])).toBe('You have zero messages.');
+		expect(i18n(msg, [{ $: enPlural, _: 5 }])).toBe('You have 5 messages.');
+		expect(i18n(msg, [{ $: enPlural, _: 0 }])).toBe('You have zero messages.');
 	});
 
 	it('ICU select', () => {
@@ -43,8 +43,8 @@ describe('i18n', () => {
 			other {Their ${have}}
 		}`;
 
-		expect(i18n(msg, [{ $: select, _: 'male' }, { $: plural, _: 1 }])).toBe('His have 1 message.');
-		expect(i18n(msg, [{ $: select, _: 'xxx' }, { $: plural, _: 2 }])).toBe('Their have 2 messages.');
+		expect(i18n(msg, [{ $: select, _: 'male' }, { $: enPlural, _: 1 }])).toBe('His have 1 message.');
+		expect(i18n(msg, [{ $: select, _: 'xxx' }, { $: enPlural, _: 2 }])).toBe('Their have 2 messages.');
 	});
 });
 
