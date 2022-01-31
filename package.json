@@ -1,6 +1,6 @@
 {
   "name": "tx-i18n",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Auto-translate for your application (ICU, pluralization, TSX/React supported)",
   "keywords": [
     "i18n",

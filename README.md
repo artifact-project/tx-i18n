@@ -198,7 +198,7 @@ addDecorator(withTXI18n);
 
 
 ```jsx
-import { plural } from 'tx-i18n/plural/en';
+import { enPlural as plural } from 'tx-i18n/plural/en';
 
 const Hello = ({name, unreadCount}) => (
 	<div>

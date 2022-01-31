@@ -53,7 +53,7 @@ obj[\`property: \${321}\`] = __(\`wow\`);
 
 exports[`plural 1`] = `
 "import __ from \\"tx-i18n/text\\";
-import { plural } from '../../../icu/plural/en';
+import { enPlural as plural } from '../../../icu/plural/en';
 console.log(__(\\"You have {v1, plural, one {# message} other {# messages}}.\\", [{ $: plural, _: 5 }]));
 console.log(__(\\"{v1, plural, one {# message} other {# messages}}\\", [{ $: plural, _: 0 }]));
 export function pluralMessages(num) {

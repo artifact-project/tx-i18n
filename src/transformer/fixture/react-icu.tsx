@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { plural } from '../../../icu/plural/en';
+import { enPlural as plural } from '../../../icu/plural/en';
 
 export type InfoProps = {
 	unread: number;

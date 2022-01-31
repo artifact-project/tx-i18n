@@ -82,7 +82,7 @@ exports[`react-icu transform Info 1`] = `
 "import __jsx from \\"tx-i18n/jsx\\";
 import __ from \\"tx-i18n/text\\";
 import * as React from 'react';
-import { plural } from '../../../icu/plural/en';
+import { enPlural as plural } from '../../../icu/plural/en';
 export const Info = ({ unread, total }) => <>
 	{__jsx(\\"You have <a1>{v2, plural, one {# unread message} other {# unread messages}}</a1>.\\", [{ type: \\"div\\", props: { \\"data-id\\": \\"unread\\" } }, { type: \\"a\\", props: { href: \\"#\\" } }, { $: plural, _: unread }])}
 	<div data-id=\\"total\\">

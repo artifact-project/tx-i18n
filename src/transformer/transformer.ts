@@ -248,7 +248,7 @@ function wrapStringLiteral(node: ts.Node | undefined, cfg: Config, decode?: bool
 	return i18nWrap(cfg, 'text', [ts.createIdentifier(normText)]);
 }
 
-const rICUFn = /^(plural|[a-z]+Plural|select)/i;
+const rICUFn = /^(plural|select)$/i;
 
 function parseICU(node: ts.Expression, idx: number) {
 	if (node.end < 0 || node.pos < 0) {
@@ -291,6 +291,10 @@ function parseICU(node: ts.Expression, idx: number) {
 				parts.push(`${node.name.getText()} {${node.initializer.getText().slice(1, -1)}}`);
 			}
 		});
+
+		if (parts.length === 0) {
+			return null;
+		}
 
 		const expr = ts.createObjectLiteral([
 			ts.createPropertyAssignment('$', fn as ts.Expression),

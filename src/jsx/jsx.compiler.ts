@@ -3,7 +3,7 @@ import { icu, Token } from '../utils/icu';
 import { AST, Element } from 'format-message-parse';
 import { htmlDecode } from '../utils/entities';
 import { InterpolateString, createInterpolateString, initInterpolateString } from '../i18n/i18n.compiler';
-import { getPlural } from '../..';
+import { getPlural } from '../../index';
 
 const EMPTY_ARRAY = [];
 const EMPTY_STRING = '';
