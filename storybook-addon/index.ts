@@ -3,7 +3,7 @@ import addons, { makeDecorator, StoryContext, StoryGetter } from '@storybook/add
 import { ADDON_EVENT_SET, ADDON_EVENT_REGISTER } from './shared';
 import { setLang, setLocale, ContextedLocale } from '../src/i18n/locale';
 import { Channel } from '@storybook/channels';
-import { plural } from '../icu/plural/ru';
+import { ruPlural as plural } from '../icu/plural/ru';
 
 export const withTXI18n = makeDecorator({
 	name: 'tx-i18n',
