@@ -47,20 +47,19 @@ export class Extractor {
 	}
 
 	apply(compiler: Compiler) {
-		compiler.plugin('watch-run', (_, done) => {
+		compiler.hooks.watchRun.tapAsync('watchRun', (_, done) => {
 			if (!this._watchMode) {
 				this._watchMode = true;
 				this.listenExit();
 			}
-
 			done();
 		});
 
-		compiler.plugin('compile', () => {
+		compiler.hooks.compile.tapAsync('compile', () => {
 			resetPhrases();
 		});
 
-		compiler.plugin('done', () => {
+		compiler.hooks.done.tap('done', () => {
 			if (!this._watchMode) {
 				this.save();
 			}
